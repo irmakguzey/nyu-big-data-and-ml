@@ -29,7 +29,7 @@ def preprocess_single_file(file_path):
         f.write(text)
 
 
-def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2"):
+def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2", max_length=512):
     # get the di`rectory of all pdf files
     all_file_paths = glob.glob(f"{root_dir}/*.pdf")
 
@@ -52,13 +52,17 @@ def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2"):
     train_datasets, test_datasets = [], []
     for file_path in train_files:
         train_datasets.append(
-            CausalLMDataset(file_path=file_path, tokenizer=tokenizer, max_length=512)
+            CausalLMDataset(
+                file_path=file_path, tokenizer=tokenizer, max_length=max_length
+            )
         )
     train_dset = data.ConcatDataset(train_datasets)
 
     for file_path in test_files:
         test_datasets.append(
-            CausalLMDataset(file_path=file_path, tokenizer=tokenizer, max_length=512)
+            CausalLMDataset(
+                file_path=file_path, tokenizer=tokenizer, max_length=max_length
+            )
         )
     test_dset = data.ConcatDataset(test_datasets)
 

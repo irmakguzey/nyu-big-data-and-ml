@@ -1,3 +1,5 @@
 *.pdf 
 *.zip 
 assignment-1/climate_text_dataset/*
+assignment-1/results/*
+assignment-1/__pycache__/*

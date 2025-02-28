@@ -23,9 +23,13 @@ class CausalLMDataset(Dataset):
             text = f.read()
         text = text.encode("latin-1").decode("utf-8", errors="ignore")
         # Tokenize the entire text corpus
-        tokenized_text = tokenizer(text, truncation=False, add_special_tokens=False)[
-            "input_ids"
-        ]
+        tokenized_text = tokenizer(
+            text,
+            # padding="max_length",  # Ensures consistent length
+            truncation=True,  # Cuts off longer sequences
+            max_length=max_length,  # Ensure it fits model constraints
+            add_special_tokens=False,
+        )["input_ids"]
 
         # Split into chunks of max_length
         self.samples = [
