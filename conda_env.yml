@@ -1,0 +1,13 @@
+name: bdml_env
+dependencies:
+  - python=3.9
+  - pip 
+  - ipykernel
+  - pytorch
+  pip: 
+    - bitsandbytes
+    - transformers
+    - accelerate
+    - peft
+    - PyPDF2
+    - pdfplumber
