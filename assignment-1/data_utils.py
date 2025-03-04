@@ -18,7 +18,14 @@ def preprocess_single_file(file_path):
     txt_path = f"{file_root}/{file_name}.txt"
 
     if os.path.exists(txt_path):
-        return
+        return txt_path 
+
+
+    SIZE_LIMIT = 20 * 1024 * 1024 # We'll be only processing files that are smaller than 20MBs
+
+    if os.path.isfile(file_path) and os.path.getsize(file_path) > SIZE_LIMIT:
+        print(f"{file_name} is larger than 20MB - Size: {os.path.getsize(file_path) / (1024 * 1024):.2f} MB")
+        return None
 
     with pdfplumber.open(file_path) as pdf:
         text = "\n".join(
@@ -28,6 +35,8 @@ def preprocess_single_file(file_path):
     with open(txt_path, "w", encoding="utf-8") as f:
         f.write(text)
 
+    return txt_path
+
 
 def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2", max_length=512):
     # get the di`rectory of all pdf files
@@ -35,16 +44,19 @@ def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2", max_length=
 
     # If not preprocessed preprocess all the files
     pbar = tqdm(total=len(all_file_paths))
+    all_text_files = []
     for file_path in all_file_paths:
         pbar.set_description(f"Preprocessing file {file_path.split('/')[-1]}")
-        preprocess_single_file(file_path)
+        txt_path = preprocess_single_file(file_path)
+        if not txt_path is None: 
+            all_text_files.append(txt_path)
         pbar.update(1)
     pbar.close()
 
     # Shuffle and split the file paths
-    np.random.shuffle(all_file_paths)
-    split_idx = int(train_test_split * len(all_file_paths))
-    train_files, test_files = all_file_paths[:split_idx], all_file_paths[split_idx:]
+    np.random.shuffle(all_text_files)
+    split_idx = int(train_test_split * len(all_text_files))
+    train_files, test_files = all_text_files[:split_idx], all_text_files[split_idx:]
     print(len(train_files), len(test_files))
 
     # Initialize all datasets
