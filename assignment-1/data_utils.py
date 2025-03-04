@@ -18,13 +18,16 @@ def preprocess_single_file(file_path):
     txt_path = f"{file_root}/{file_name}.txt"
 
     if os.path.exists(txt_path):
-        return txt_path 
+        return txt_path
 
-
-    SIZE_LIMIT = 20 * 1024 * 1024 # We'll be only processing files that are smaller than 20MBs
+    SIZE_LIMIT = (
+        7 * 1024 * 1024
+    )  # We'll be only processing files that are smaller than 20MBs
 
     if os.path.isfile(file_path) and os.path.getsize(file_path) > SIZE_LIMIT:
-        print(f"{file_name} is larger than 20MB - Size: {os.path.getsize(file_path) / (1024 * 1024):.2f} MB")
+        print(
+            f"{file_name} is larger than 7MB - Size: {os.path.getsize(file_path) / (1024 * 1024):.2f} MB"
+        )
         return None
 
     with pdfplumber.open(file_path) as pdf:
@@ -48,7 +51,7 @@ def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2", max_length=
     for file_path in all_file_paths:
         pbar.set_description(f"Preprocessing file {file_path.split('/')[-1]}")
         txt_path = preprocess_single_file(file_path)
-        if not txt_path is None: 
+        if not txt_path is None:
             all_text_files.append(txt_path)
         pbar.update(1)
     pbar.close()
