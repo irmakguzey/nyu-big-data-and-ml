@@ -1,10 +1,15 @@
 from data_utils import get_datasets
-from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
+from transformers import (
+    AutoModelForCausalLM,
+    LlamaForCausalLM,
+    Trainer,
+    TrainingArguments,
+)
 
 
 def train():
     # Load GPT-2 model
-    model = AutoModelForCausalLM.from_pretrained("/scratch/BDML25SP/Llama3.2-3B")
+    model = LlamaForCausalLM.from_pretrained("/scratch/BDML25SP/Llama3.2-3B")
     train_dset, test_dset = get_datasets(
         root_dir="climate_text_dataset",
         model_name="/scratch/BDML25SP/Llama3.2-3B",
