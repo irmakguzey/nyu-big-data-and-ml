@@ -17,5 +17,5 @@ singularity exec --bind /scratch --nv --overlay  /scratch/ig2283/overlay-25GB-50
 source /ext3/env.sh
 conda activate bdml_env
 cd /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1
-python ./data_utils.py
+python train.py
 "
