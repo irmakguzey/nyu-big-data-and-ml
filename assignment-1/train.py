@@ -4,10 +4,14 @@ from transformers import AutoModelForCausalLM, Trainer, TrainingArguments
 
 def train():
     # Load GPT-2 model
-    model = AutoModelForCausalLM.from_pretrained("gpt2")
+    model = AutoModelForCausalLM.from_pretrained("/scratch/BDML25SP/Llama3.2-3B")
     train_dset, test_dset = get_datasets(
-        root_dir="climate_text_dataset", model_name="gpt2", max_length=512
+        root_dir="climate_text_dataset",
+        model_name="/scratch/BDML25SP/Llama3.2-3B",
+        max_length=512,
     )
+    print(f"train_dset len: {len(train_dset)}")
+    print(f"len(test_dset): {len(test_dset)}")
 
     # Define Training Arguments
     training_args = TrainingArguments(
@@ -16,7 +20,7 @@ def train():
         save_strategy="epoch",
         per_device_train_batch_size=8,
         per_device_eval_batch_size=8,
-        num_train_epochs=3,
+        num_train_epochs=10,
         weight_decay=0.01,
         logging_dir="./logs",
     )
