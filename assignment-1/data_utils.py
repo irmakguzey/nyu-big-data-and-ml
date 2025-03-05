@@ -41,20 +41,25 @@ def preprocess_single_file(file_path):
     return txt_path
 
 
-def get_datasets(root_dir, train_test_split=0.9, model_name="gpt-2", max_length=512):
+def get_datasets(
+    root_dir, preprocess=True, train_test_split=0.9, model_name="gpt-2", max_length=512
+):
     # get the di`rectory of all pdf files
-    all_file_paths = glob.glob(f"{root_dir}/*.pdf")
 
     # If not preprocessed preprocess all the files
-    pbar = tqdm(total=len(all_file_paths))
-    all_text_files = []
-    for file_path in all_file_paths:
-        pbar.set_description(f"Preprocessing file {file_path.split('/')[-1]}")
-        txt_path = preprocess_single_file(file_path)
-        if not txt_path is None:
-            all_text_files.append(txt_path)
-        pbar.update(1)
-    pbar.close()
+    if preprocess:
+        all_file_paths = glob.glob(f"{root_dir}/*.pdf")
+        pbar = tqdm(total=len(all_file_paths))
+        all_text_files = []
+        for file_path in all_file_paths:
+            pbar.set_description(f"Preprocessing file {file_path.split('/')[-1]}")
+            txt_path = preprocess_single_file(file_path)
+            if not txt_path is None:
+                all_text_files.append(txt_path)
+            pbar.update(1)
+        pbar.close()
+    else:
+        all_text_files = glob.glob(f"{root_dir}/*.txt")
 
     # Shuffle and split the file paths
     np.random.shuffle(all_text_files)

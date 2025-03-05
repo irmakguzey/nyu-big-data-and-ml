@@ -36,12 +36,14 @@ class CausalLMDataset(Dataset):
             tokenized_text[i : i + max_length]
             for i in range(0, len(tokenized_text), max_length)
         ]
+        # print(self.samples)
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
         input_ids = self.samples[idx]
+        # print(input_ids)
         attention_mask = [1] * len(input_ids)
 
         # Pad to max_length

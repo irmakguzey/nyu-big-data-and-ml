@@ -10,11 +10,13 @@ from transformers import (
 def train():
     # Load GPT-2 model
     model = AutoModelForCausalLM.from_pretrained(
-        "/scratch/BDML25SP/Llama3.2-3B/consolidated.00.pth"
+        # "/scratch/BDML25SP/Llama3.2-3B/consolidated.00.pth"
+        "gpt2"
     )
     train_dset, test_dset = get_datasets(
         root_dir="climate_text_dataset",
-        model_name="/scratch/BDML25SP/Llama3.2-3B/tokenizer.model",
+        # model_name="/scratch/BDML25SP/Llama3.2-3B/tokenizer.model",
+        model_name="gpt2",
         max_length=512,
     )
     print(f"train_dset len: {len(train_dset)}")
