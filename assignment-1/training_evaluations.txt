@@ -1,0 +1,1 @@
+NUM EPOCHS: 10 | BATCH SIZE: 16 | PERPLEXITY: 12.307############

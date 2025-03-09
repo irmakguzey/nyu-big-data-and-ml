@@ -13,19 +13,13 @@ class CausalLMDataset(Dataset):
         self.tokenizer = tokenizer
         self.max_length = max_length
 
-        # Read file and tokenize entire content
-        # with open(file_path, "rb") as f:
-        #     raw_data = f.read()
-        #     print(raw_data[:100]) TODO: Delete this
-        # raw_data = f.read()
-        # print(raw_data[:100])
         with open(file_path, "r", encoding="latin-1") as f:
             text = f.read()
         text = text.encode("latin-1").decode("utf-8", errors="ignore")
         # Tokenize the entire text corpus
         tokenized_text = tokenizer(
             text,
-            # padding="max_length",  # Ensures consistent length
+            padding="max_length",  # Ensures consistent length
             truncation=True,  # Cuts off longer sequences
             max_length=max_length,  # Ensure it fits model constraints
             add_special_tokens=False,
