@@ -1,6 +1,7 @@
 import math
 import os
 import time
+from dataclasses import dataclass
 
 import torch
 from data_utils import get_datasets
@@ -13,9 +14,20 @@ from transformers import (
 )
 
 
-def evaluate(model_path, num_epochs, batch_size):
-    model = AutoModelForCausalLM.from_pretrained(model_path)
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+@dataclass
+class TrainingConfig:
+    model_path: str = "gpt2"
+    root_dir: str = "climate_text_dataset"
+    batch_size: int = 10
+    num_epochs: int = 16
+    is_lora: bool = False
+    precision_opt: bool = False
+    gradient_acc: bool = False
+
+
+def evaluate(finetuned_model_path, training_cfg):
+    model = AutoModelForCausalLM.from_pretrained(finetuned_model_path)
+    tokenizer = AutoTokenizer.from_pretrained(finetuned_model_path)
 
     evaluation_text = """
     Climate change is caused by an increase in greenhouse gases such as CO2.
@@ -33,30 +45,24 @@ def evaluate(model_path, num_epochs, batch_size):
     perplexity = math.exp(loss)
     print(f"Perplexity: {perplexity:.2f}")
     with open("training_evaluations.txt", "a") as f:
-        f.write(
-            f"NUM EPOCHS: {num_epochs} | BATCH SIZE: {batch_size} | PERPLEXITY: {perplexity:.3f}"
-        )
-        f.write("############")
+        for key, value in training_cfg.__dict__.items():
+            f.write(f"{key}: {value}\n")
+        f.write(f"perplexity: {perplexity:.3f}\n")
+        f.write("###################")
 
 
-def train(
-    pretrained_model_path,
-    num_epochs,
-    batch_size,
-    lora=False,
-    precision_opt=False,
-    gradient_acc=False,
-):
+def train(training_cfg):
+
     # Load GPT-2 model
     before_time = time.time()
     print(f"time before loading: {before_time}")
-    model = AutoModelForCausalLM.from_pretrained(pretrained_model_path)
+    model = AutoModelForCausalLM.from_pretrained(training_cfg.model_path)
     after_time = time.time()
     print(f"time after loading: {after_time}")
     print(f"time passed: {before_time - after_time}")
     train_dset, test_dset, tokenizer = get_datasets(
-        root_dir="climate_text_dataset",
-        model_name=pretrained_model_path,
+        root_dir=training_cfg.root_dir,
+        model_name=training_cfg.model_path,
         preprocess=False,
         max_length=512,
     )
@@ -68,9 +74,9 @@ def train(
         output_dir="./results",
         evaluation_strategy="epoch",
         save_strategy="epoch",
-        per_device_train_batch_size=8,
-        per_device_eval_batch_size=8,
-        num_train_epochs=num_epochs,
+        per_device_train_batch_size=training_cfg.batch_size,
+        per_device_eval_batch_size=training_cfg.batch_size,
+        num_train_epochs=training_cfg.num_epochs,
         weight_decay=0.01,
         logging_dir="./logs",
     )
@@ -92,19 +98,20 @@ def train(
 
 
 if __name__ == "__main__":
-    num_epochs = 10
-    batch_size = 16
-    pretrained_model_path = (
-        # "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
-        "gpt2"
+    training_cfg = TrainingConfig(
+        model_path="gpt2",
+        # model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        root_dir="climate_text_dataset_all",
+        batch_size=32,
+        num_epochs=10,
+        is_lora=False,
+        precision_opt=False,
+        gradient_acc=False,
     )
-    train(
-        pretrained_model_path=pretrained_model_path,
-        num_epochs=num_epochs,
-        batch_size=batch_size,
-    )
+    print(f"config: {training_cfg}")
+
+    train(training_cfg)
     evaluate(
-        f"results/checkpoint-{num_epochs}",
-        num_epochs=num_epochs,
-        batch_size=batch_size,
+        finetuned_model_path=f"results/checkpoint-{training_cfg.num_epochs}",
+        training_cfg=training_cfg,
     )
