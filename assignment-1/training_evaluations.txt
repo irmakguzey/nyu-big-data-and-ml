@@ -1,0 +1,21 @@
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 10
+is_lora: False
+precision_opt: False
+gradient_acc: False
+perplexity: 12.307
+###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 10
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 256
+perplexity: 32.311
+###################

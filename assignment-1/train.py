@@ -24,6 +24,7 @@ class TrainingConfig:
     is_lora: bool = False
     precision_opt: bool = False
     gradient_acc: bool = False
+    max_token_len: int = 512
 
 
 def evaluate(finetuned_model_path, training_cfg):
@@ -52,7 +53,7 @@ def evaluate(finetuned_model_path, training_cfg):
         f.write("###################\n")
 
 
-def train(training_cfg):
+def train(training_cfg: TrainingConfig):
 
     # Load GPT-2 model
     before_time = time.time()
@@ -65,10 +66,11 @@ def train(training_cfg):
         root_dir=training_cfg.root_dir,
         model_name=training_cfg.model_path,
         preprocess=False,
-        max_length=512,
+        max_length=training_cfg.max_token_len,
     )
     print(f"train_dset len: {len(train_dset)}")
     print(f"len(test_dset): {len(test_dset)}")
+    model.resize_token_embeddings(len(tokenizer))
 
     # Define Training Arguments
     training_args = TrainingArguments(
@@ -78,6 +80,7 @@ def train(training_cfg):
         per_device_train_batch_size=training_cfg.batch_size,
         per_device_eval_batch_size=training_cfg.batch_size,
         num_train_epochs=training_cfg.num_epochs,
+        dataloader_num_workers=16,
         weight_decay=0.01,
         logging_dir="./logs",
     )
@@ -105,8 +108,9 @@ if __name__ == "__main__":
         # model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
         # results_dir="./results-llamba",
         root_dir="climate_text_dataset",
-        batch_size=32,
-        num_epochs=10,
+        batch_size=8,
+        num_epochs=20,
+        max_token_len=512,
         is_lora=False,
         precision_opt=False,
         gradient_acc=False,
@@ -115,6 +119,6 @@ if __name__ == "__main__":
 
     train(training_cfg)
     evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{training_cfg.num_epochs}",
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-220",
         training_cfg=training_cfg,
     )

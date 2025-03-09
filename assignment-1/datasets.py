@@ -19,10 +19,10 @@ class CausalLMDataset(Dataset):
         # Tokenize the entire text corpus
         tokenized_text = tokenizer(
             text,
-            padding="max_length",  # Ensures consistent length
-            truncation=True,  # Cuts off longer sequences
+            # padding="max_length",  # Ensures consistent length
+            # truncation=True,  # Cuts off longer sequences
             max_length=max_length,  # Ensure it fits model constraints
-            add_special_tokens=False,
+            # add_special_tokens=False,
         )["input_ids"]
 
         # Split into chunks of max_length
@@ -37,7 +37,6 @@ class CausalLMDataset(Dataset):
 
     def __getitem__(self, idx):
         input_ids = self.samples[idx]
-        # print(input_ids)
         attention_mask = [1] * len(input_ids)
 
         # Pad to max_length
@@ -52,8 +51,12 @@ class CausalLMDataset(Dataset):
             -100 if token == self.tokenizer.pad_token_id else token for token in labels
         ]
 
-        return {
+        return_dict = {
             "input_ids": torch.tensor(input_ids, dtype=torch.long),
             "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
             "labels": torch.tensor(labels, dtype=torch.long),
         }
+        # for key, tensor in return_dict.items():
+        #     print(f"key: {key}, shape: {tensor.shape}")
+
+        return return_dict

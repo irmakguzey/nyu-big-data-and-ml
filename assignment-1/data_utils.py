@@ -42,7 +42,7 @@ def preprocess_single_file(file_path):
 
 
 def get_datasets(
-    root_dir, preprocess=True, train_test_split=0.9, model_name="gpt-2", max_length=512
+    root_dir, preprocess=True, train_test_split=0.9, model_name="gpt2", max_length=512
 ):
     # get the di`rectory of all pdf files
 
