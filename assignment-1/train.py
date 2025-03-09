@@ -65,7 +65,7 @@ def train(training_cfg: TrainingConfig):
     train_dset, test_dset, tokenizer = get_datasets(
         root_dir=training_cfg.root_dir,
         model_name=training_cfg.model_path,
-        preprocess=False,
+        preprocess=True,
         max_length=training_cfg.max_token_len,
     )
     print(f"train_dset len: {len(train_dset)}")
@@ -117,8 +117,8 @@ if __name__ == "__main__":
     )
     print(f"config: {training_cfg}")
 
-    train(training_cfg)
+    # train(training_cfg)
     evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-220",
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-20",
         training_cfg=training_cfg,
     )

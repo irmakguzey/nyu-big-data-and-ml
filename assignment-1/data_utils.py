@@ -5,8 +5,7 @@ import numpy as np
 import pdfplumber
 import torch.utils.data as data
 from datasets import CausalLMDataset
-
-# from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
@@ -30,13 +29,18 @@ def preprocess_single_file(file_path):
         )
         return None
 
-    with pdfplumber.open(file_path) as pdf:
-        text = "\n".join(
-            page.extract_text() for page in pdf.pages if page.extract_text()
-        )
+    reader = PdfReader(file_path)
+    with open(txt_path, "w", encoding="utf-8") as txt_file:
+        for page in reader.pages:
+            txt_file.write(page.extract_text() + "\n\n")
 
-    with open(txt_path, "w", encoding="utf-8") as f:
-        f.write(text)
+    # with pdfplumber.open(file_path) as pdf:
+    #     text = "\n".join(
+    #         page.extract_text() for page in pdf.pages if page.extract_text()
+    #     )
+
+    # with open(txt_path, "w", encoding="utf-8") as f:
+    #     f.write(text)
 
     return txt_path
 

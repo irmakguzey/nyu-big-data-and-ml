@@ -19,3 +19,58 @@ gradient_acc: False
 max_token_len: 256
 perplexity: 32.311
 ###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 20
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 256
+perplexity: 20.542
+###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 20
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 512
+perplexity: 21.794
+###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 20
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 512
+perplexity: 17.616
+###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 20
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 512
+perplexity: 17.616
+###################
+model_path: gpt2
+root_dir: climate_text_dataset
+results_dir: ./results-gpt
+batch_size: 8
+num_epochs: 20
+is_lora: False
+precision_opt: False
+gradient_acc: False
+max_token_len: 512
+perplexity: 12.561
+###################
