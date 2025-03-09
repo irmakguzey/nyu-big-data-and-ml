@@ -18,6 +18,7 @@ from transformers import (
 class TrainingConfig:
     model_path: str = "gpt2"
     root_dir: str = "climate_text_dataset"
+    results_dir: str = "./results"
     batch_size: int = 10
     num_epochs: int = 16
     is_lora: bool = False
@@ -48,7 +49,7 @@ def evaluate(finetuned_model_path, training_cfg):
         for key, value in training_cfg.__dict__.items():
             f.write(f"{key}: {value}\n")
         f.write(f"perplexity: {perplexity:.3f}\n")
-        f.write("###################")
+        f.write("###################\n")
 
 
 def train(training_cfg):
@@ -71,7 +72,7 @@ def train(training_cfg):
 
     # Define Training Arguments
     training_args = TrainingArguments(
-        output_dir="./results",
+        output_dir=training_cfg.results_dir,
         evaluation_strategy="epoch",
         save_strategy="epoch",
         per_device_train_batch_size=training_cfg.batch_size,
@@ -100,8 +101,10 @@ def train(training_cfg):
 if __name__ == "__main__":
     training_cfg = TrainingConfig(
         model_path="gpt2",
+        results_dir="./results-gpt",
         # model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
-        root_dir="climate_text_dataset_all",
+        # results_dir="./results-llamba",
+        root_dir="climate_text_dataset",
         batch_size=32,
         num_epochs=10,
         is_lora=False,
@@ -112,6 +115,6 @@ if __name__ == "__main__":
 
     train(training_cfg)
     evaluate(
-        finetuned_model_path=f"results/checkpoint-{training_cfg.num_epochs}",
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{training_cfg.num_epochs}",
         training_cfg=training_cfg,
     )
