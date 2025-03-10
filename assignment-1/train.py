@@ -153,6 +153,6 @@ if __name__ == "__main__":
     # last_checkpoint = train(training_cfg)
     # print(f"last_checkpoint: {last_checkpoint}")
     evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-3",
         training_cfg=training_cfg,
     )
