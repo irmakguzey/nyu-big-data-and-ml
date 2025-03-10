@@ -49,7 +49,7 @@ def evaluate(finetuned_model_path, training_cfg):
     with open("training_evaluations.txt", "a") as f:
         for key, value in training_cfg.__dict__.items():
             f.write(f"{key}: {value}\n")
-        f.write(f"checkpoint: {checkpoint}")
+        f.write(f"checkpoint: {checkpoint}\n")
         f.write(f"perplexity: {perplexity:.3f}\n")
         f.write("###################\n")
 
@@ -71,7 +71,7 @@ def train(training_cfg: TrainingConfig):
     train_dset, test_dset, tokenizer = get_datasets(
         root_dir=training_cfg.root_dir,
         model_name=training_cfg.model_path,
-        preprocess=True,
+        preprocess=False,
         max_length=training_cfg.max_token_len,
     )
     print(f"train_dset len: {len(train_dset)}")
@@ -128,25 +128,73 @@ def train(training_cfg: TrainingConfig):
 
 
 if __name__ == "__main__":
+
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
         results_dir="./results-llamba",
         root_dir="climate_text_dataset",
-        batch_size=16,
-        num_epochs=10,
+        batch_size=8,
+        num_epochs=20,
         gradient_accumulation_steps=8,
+        max_token_len=512,
+        is_lora=False,
+        precision_opt=False,
+        gradient_acc=False,
+    )
+    print(f"config: {training_cfg}")
+    last_checkpoint = train(training_cfg)
+    print(f"last_checkpoint: {last_checkpoint}")
+    evaluate(
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+        training_cfg=training_cfg,
+    )
+
+    print("#################### GRADIENT ACCUMULATION TESTED ##################")
+
+    training_cfg = TrainingConfig(
+        # model_path="gpt2",
+        # results_dir="./results-gpt",
+        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        results_dir="./results-llamba",
+        root_dir="climate_text_dataset",
+        batch_size=32,
+        num_epochs=20,
+        gradient_accumulation_steps=16,
         max_token_len=512,
         is_lora=True,
         precision_opt=False,
         gradient_acc=False,
     )
     print(f"config: {training_cfg}")
-
-    # last_checkpoint = train(training_cfg)
-    # print(f"last_checkpoint: {last_checkpoint}")
+    last_checkpoint = train(training_cfg)
+    print(f"last_checkpoint: {last_checkpoint}")
     evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-3",
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+        training_cfg=training_cfg,
+    )
+
+    print("#################### LARGER BATCH TESTED ##################")
+
+    training_cfg = TrainingConfig(
+        # model_path="gpt2",
+        # results_dir="./results-gpt",
+        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        results_dir="./results-llamba",
+        root_dir="climate_text_dataset",
+        batch_size=64,
+        num_epochs=20,
+        gradient_accumulation_steps=16,
+        max_token_len=512,
+        is_lora=True,
+        precision_opt=True,
+        gradient_acc=True,
+    )
+    print(f"config: {training_cfg}")
+    last_checkpoint = train(training_cfg)
+    print(f"last_checkpoint: {last_checkpoint}")
+    evaluate(
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
         training_cfg=training_cfg,
     )
