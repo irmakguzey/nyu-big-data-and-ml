@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pdfplumber
 import torch.utils.data as data
+from config import TrainingConfig
 from datasets import CausalLMDataset
 from PyPDF2 import PdfReader
 from tqdm import tqdm
@@ -98,9 +99,19 @@ def get_datasets(
 
 
 if __name__ == "__main__":
-
-    train_dset, test_dset = get_datasets(
-        root_dir="climate_text_dataset", model_name="gpt2"
+    training_cfg = TrainingConfig(
+        # model_path="gpt2",
+        # results_dir="./results-gpt",
+        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        results_dir="./results-llamba",
+        root_dir="climate_text_dataset",
+        max_token_len=512,
+    )
+    train_dset, test_dset, tokenizer = get_datasets(
+        root_dir=training_cfg.root_dir,
+        model_name=training_cfg.model_path,
+        preprocess=True,
+        max_length=training_cfg.max_token_len,
     )
     print(f"train_dset len: {len(train_dset)}")
     print(f"len(test_dset): {len(test_dset)}")
