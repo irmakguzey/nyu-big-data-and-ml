@@ -91,7 +91,7 @@ def train(training_cfg: TrainingConfig):
         num_train_epochs=training_cfg.num_epochs,
         dataloader_num_workers=16,
         weight_decay=0.01,
-        # fp16=training_cfg.precision_opt,  # TODO: Do ths bf16 as well?
+        fp16=training_cfg.precision_opt,  # TODO: Do ths bf16 as well?
         logging_dir="./logs",
     )
 
@@ -129,10 +129,10 @@ def train(training_cfg: TrainingConfig):
 
 if __name__ == "__main__":
     training_cfg = TrainingConfig(
-        model_path="gpt2",
-        results_dir="./results-gpt",
-        # model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
-        # results_dir="./results-llamba",
+        # model_path="gpt2",
+        # results_dir="./results-gpt",
+        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        results_dir="./results-llamba",
         root_dir="climate_text_dataset",
         batch_size=16,
         num_epochs=3,
