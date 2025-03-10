@@ -6,8 +6,13 @@ from dataclasses import dataclass
 import torch
 from data_utils import get_datasets
 from peft import LoraConfig, TaskType, get_peft_model
-from transformers import AutoModelForCausalLM  # BitsAndBytesConfig,
-from transformers import AutoTokenizer, Trainer, TrainingArguments
+from transformers import (
+    AutoModelForCausalLM,
+    AutoTokenizer,
+    BitsAndBytesConfig,
+    Trainer,
+    TrainingArguments,
+)
 
 
 @dataclass
@@ -27,6 +32,7 @@ class TrainingConfig:
 def evaluate(finetuned_model_path, training_cfg):
     model = AutoModelForCausalLM.from_pretrained(finetuned_model_path)
     tokenizer = AutoTokenizer.from_pretrained(finetuned_model_path)
+    model.resize_token_embeddings(len(tokenizer))
 
     checkpoint = (
         finetuned_model_path.split("/")[-1].split("checkpoint")[-1].split("-")[-1]
@@ -135,8 +141,8 @@ if __name__ == "__main__":
         results_dir="./results-llamba",
         root_dir="climate_text_dataset",
         batch_size=16,
-        num_epochs=3,
-        gradient_accumulation_steps=1,
+        num_epochs=10,
+        gradient_accumulation_steps=8,
         max_token_len=512,
         is_lora=True,
         precision_opt=False,
@@ -144,8 +150,8 @@ if __name__ == "__main__":
     )
     print(f"config: {training_cfg}")
 
-    last_checkpoint = train(training_cfg)
-    print(f"last_checkpoint: {last_checkpoint}")
+    # last_checkpoint = train(training_cfg)
+    # print(f"last_checkpoint: {last_checkpoint}")
     evaluate(
         finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
         training_cfg=training_cfg,
