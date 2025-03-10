@@ -85,7 +85,7 @@ def train(training_cfg: TrainingConfig):
     train_dset, test_dset, tokenizer = get_datasets(
         root_dir=training_cfg.root_dir,
         model_name=training_cfg.model_path,
-        preprocess=False,
+        preprocess=True,
         max_length=training_cfg.max_token_len,
     )
     print(f"train_dset len: {len(train_dset)}")
