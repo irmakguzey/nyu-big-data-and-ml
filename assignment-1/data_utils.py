@@ -16,18 +16,18 @@ def preprocess_single_file(file_path):
     file_root = "/".join(file_path.split("/")[:-1])
     txt_path = f"{file_root}/{file_name}.txt"
 
-    if os.path.exists(txt_path):
-        return txt_path
+    # if os.path.exists(txt_path):
+    #     return txt_path
 
-    SIZE_LIMIT = (
-        7 * 1024 * 1024
-    )  # We'll be only processing files that are smaller than 20MBs
+    # SIZE_LIMIT = (
+    #     7 * 1024 * 1024
+    # )  # We'll be only processing files that are smaller than 20MBs
 
-    if os.path.isfile(file_path) and os.path.getsize(file_path) > SIZE_LIMIT:
-        print(
-            f"{file_name} is larger than 7MB - Size: {os.path.getsize(file_path) / (1024 * 1024):.2f} MB"
-        )
-        return None
+    # if os.path.isfile(file_path) and os.path.getsize(file_path) > SIZE_LIMIT:
+    #     print(
+    #         f"{file_name} is larger than 7MB - Size: {os.path.getsize(file_path) / (1024 * 1024):.2f} MB"
+    #     )
+    #     return None
 
     reader = PdfReader(file_path)
     with open(txt_path, "w", encoding="utf-8") as txt_file:
