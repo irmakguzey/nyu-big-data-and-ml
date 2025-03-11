@@ -147,7 +147,7 @@ if __name__ == "__main__":
         max_token_len=128,
         is_lora=True,
         precision_opt=True,
-        gradient_acc=True,
+        gradient_acc=False,
     )
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
