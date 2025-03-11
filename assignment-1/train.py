@@ -134,12 +134,13 @@ if __name__ == "__main__":
     timestamp = time.time()
     time_local = time.localtime(timestamp)
     # Format the time struct into a string
-    string_local = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
+    string_local = time.strftime("%m-%d_%H:%M:%S", time_local)
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="./Llama3.2-3B",
-        results_dir=f"./results-llamba-{string_local}",
+        # results_dir=f"./results-llamba-{string_local}",
+        results_dir="results-llamba-2025-03-11\ 17:11:54",
         root_dir="climate_text_dataset",
         batch_size=32,
         num_epochs=5,
@@ -149,8 +150,9 @@ if __name__ == "__main__":
         precision_opt=True,
         gradient_acc=False,
     )
-    print(f"config: {training_cfg}")
-    last_checkpoint = train(training_cfg)
+    # print(f"config: {training_cfg}")
+    # last_checkpoint = train(training_cfg)
+    last_checkpoint = 10
     print(f"last_checkpoint: {last_checkpoint}")
     evaluate(
         finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
