@@ -129,13 +129,19 @@ def train(training_cfg: TrainingConfig):
 
 if __name__ == "__main__":
 
+    import time
+
+    timestamp = time.time()
+
+    # Format the time struct into a string
+    string_local = time.strftime("%Y-%m-%d %H:%M:%S", timestamp)
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="./Llama3.2-3B",
-        results_dir="./results-llamba",
+        results_dir=f"./results-llamba-{string_local}",
         root_dir="climate_text_dataset",
-        batch_size=1,
+        batch_size=32,
         num_epochs=5,
         gradient_accumulation_steps=1,
         max_token_len=128,
