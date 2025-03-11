@@ -21,8 +21,8 @@ def evaluate(finetuned_model_path, training_cfg):
         # Shouldn't load the model but should load the original and add adapter
         model = AutoModelForCausalLM.from_pretrained(training_cfg.model_path)
         tokenizer = AutoTokenizer.from_pretrained(training_cfg.model_path)
-        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-        tokenizer.pad_token = "[PAD]"
+        # tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        # tokenizer.pad_token = "[PAD]"
         model.resize_token_embeddings(len(tokenizer))
         model = PeftModel.from_pretrained(model, finetuned_model_path)
 
@@ -30,6 +30,8 @@ def evaluate(finetuned_model_path, training_cfg):
     else:
         model = AutoModelForCausalLM.from_pretrained(finetuned_model_path)
         tokenizer = AutoTokenizer.from_pretrained(finetuned_model_path)
+        # tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        # tokenizer.pad_token = "[PAD]"
         model.resize_token_embeddings(len(tokenizer))
     print("Tokenizer vocab size:", tokenizer.vocab_size)
     print("Model vocab size:", model.config.vocab_size)
@@ -145,13 +147,13 @@ if __name__ == "__main__":
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="./Llama3.2-3B",
-        # results_dir=f"./results-llamba-{string_local}",
-        results_dir="results-llamba-2025-03-11_17:11:54",
+        results_dir=f"./results-llamba-{string_local}",
+        # results_dir="results-llamba-2025-03-11_17:11:54",
         root_dir="climate_text_dataset",
-        batch_size=32,
+        batch_size=64,
         num_epochs=5,
         gradient_accumulation_steps=8,
-        max_token_len=128,
+        max_token_len=256,
         is_lora=True,
         precision_opt=True,
         gradient_acc=False,
