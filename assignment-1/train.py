@@ -20,6 +20,7 @@ def evaluate(finetuned_model_path, training_cfg):
         # Shouldn't load the model but should load the original and add adapter
         model = AutoModelForCausalLM.from_pretrained(training_cfg.model_path)
         tokenizer = AutoTokenizer.from_pretrained(training_cfg.model_path)
+        model.resize_token_embeddings(len(tokenizer))
         model.load_adapter(finetuned_model_path)
     else:
         model = AutoModelForCausalLM.from_pretrained(finetuned_model_path)
