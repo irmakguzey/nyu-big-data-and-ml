@@ -88,7 +88,7 @@ def train(training_cfg: TrainingConfig):
     print(f"len(test_dset): {len(test_dset)}")
     model.resize_token_embeddings(len(tokenizer))
     if training_cfg.gradient_acc:
-        model.gradient_checkpointing_enable()
+        model.enable_gradient_checkpointing()
 
     # Define Training Arguments
     training_args = TrainingArguments(
