@@ -146,8 +146,8 @@ if __name__ == "__main__":
         gradient_accumulation_steps=8,
         max_token_len=128,
         is_lora=True,
-        precision_opt=False,
-        gradient_acc=False,
+        precision_opt=True,
+        gradient_acc=True,
     )
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)

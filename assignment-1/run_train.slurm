@@ -1,13 +1,13 @@
 #!/bin/sh
 #SBATCH --job-name=job_wgpu
 #SBATCH --account=csci_ga_3033_077-2025sp
-#SBATCH --partition=c24m170-a100-2
+#SBATCH --partition=c12m85-a100-1
 #SBATCH --open-mode=append
 #SBATCH --output=./%j_%x.out
 #SBATCH --error=./%j_%x.err
 #SBATCH --export=ALL
 #SBATCH --time=06:00:00
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --requeue
 #SBATCH --mem=25G
 #SBATCH --mail-type=BEGIN
