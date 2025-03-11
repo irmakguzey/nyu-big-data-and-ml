@@ -89,7 +89,7 @@ def train(training_cfg: TrainingConfig):
         gradient_accumulation_steps=training_cfg.gradient_accumulation_steps,
         per_device_eval_batch_size=training_cfg.batch_size,
         num_train_epochs=training_cfg.num_epochs,
-        dataloader_num_workers=16,
+        dataloader_num_workers=8,
         weight_decay=0.01,
         fp16=training_cfg.precision_opt,  # TODO: Do ths bf16 as well?
         logging_dir="./logs",
