@@ -146,10 +146,10 @@ if __name__ == "__main__":
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
     print(f"last_checkpoint: {last_checkpoint}")
-    evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-        training_cfg=training_cfg,
-    )
+    #evaluate(
+    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+    #    training_cfg=training_cfg,
+    #)
 
     print("#################### ALL TESTED ##################")
 
@@ -157,7 +157,7 @@ if __name__ == "__main__":
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="./Llama3.2-3B",
-        results_dir="./results-llamba",
+        results_dir="./results-llamba-1",
         root_dir="climate_text_dataset",
         batch_size=32,
         num_epochs=20,
@@ -170,10 +170,10 @@ if __name__ == "__main__":
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
     print(f"last_checkpoint: {last_checkpoint}")
-    evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-        training_cfg=training_cfg,
-    )
+    #evaluate(
+    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+    #    training_cfg=training_cfg,
+    #)
 
     print("#################### LARGER BATCH TESTED ##################")
 
@@ -181,7 +181,7 @@ if __name__ == "__main__":
         # model_path="gpt2",
         # results_dir="./results-gpt",
         model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
-        results_dir="./results-llamba",
+        results_dir="./results-llamba-2",
         root_dir="climate_text_dataset",
         batch_size=64,
         num_epochs=20,
@@ -194,7 +194,7 @@ if __name__ == "__main__":
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
     print(f"last_checkpoint: {last_checkpoint}")
-    evaluate(
-        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-        training_cfg=training_cfg,
-    )
+    #evaluate(
+    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+    #    training_cfg=training_cfg,
+    #)
