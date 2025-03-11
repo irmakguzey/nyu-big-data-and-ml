@@ -6,6 +6,7 @@ import torch
 from config import TrainingConfig
 from data_utils import get_datasets
 from peft import LoraConfig, TaskType, get_peft_model
+from peft.peft_model import PeftModel
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -21,7 +22,10 @@ def evaluate(finetuned_model_path, training_cfg):
         model = AutoModelForCausalLM.from_pretrained(training_cfg.model_path)
         tokenizer = AutoTokenizer.from_pretrained(training_cfg.model_path)
         model.resize_token_embeddings(len(tokenizer))
-        model.load_adapter(finetuned_model_path)
+
+        model = PeftModel.from_pretrained(model, finetuned_model_path)
+
+        # model.load_adapter(finetuned_model_path)
     else:
         model = AutoModelForCausalLM.from_pretrained(finetuned_model_path)
         tokenizer = AutoTokenizer.from_pretrained(finetuned_model_path)
