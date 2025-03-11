@@ -92,8 +92,7 @@ def train(training_cfg: TrainingConfig):
         dataloader_num_workers=8,
         auto_find_batch_size=True,
         weight_decay=0.01,
-        fp16=True,  # TODO: Do ths bf16 as well?
-        bf16=True,
+        fp16=True,
         logging_dir="./logs",
     )
 
