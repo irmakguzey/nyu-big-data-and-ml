@@ -6,8 +6,8 @@
 #SBATCH --output=./%j_%x.out
 #SBATCH --error=./%j_%x.err
 #SBATCH --export=ALL
-#SBATCH --time=04:00:00
-#SBATCH --gres=gpu:1
+#SBATCH --time=06:00:00
+#SBATCH --gres=gpu:4
 #SBATCH --requeue
 #SBATCH --mem=25G
 #SBATCH --mail-type=BEGIN
