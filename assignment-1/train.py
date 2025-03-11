@@ -90,9 +90,10 @@ def train(training_cfg: TrainingConfig):
         per_device_eval_batch_size=training_cfg.batch_size,
         num_train_epochs=training_cfg.num_epochs,
         dataloader_num_workers=8,
+        auto_find_batch_size=True,
         weight_decay=0.01,
-        fp16=training_cfg.precision_opt,  # TODO: Do ths bf16 as well?
-        bf16=training_cfg.precision_opt,
+        fp16=True,  # TODO: Do ths bf16 as well?
+        bf16=True,
         logging_dir="./logs",
     )
 
@@ -143,7 +144,7 @@ if __name__ == "__main__":
         root_dir="climate_text_dataset",
         batch_size=32,
         num_epochs=5,
-        gradient_accumulation_steps=1,
+        gradient_accumulation_steps=8,
         max_token_len=128,
         is_lora=True,
         precision_opt=False,
