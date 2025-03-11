@@ -73,9 +73,9 @@ def get_datasets(
 
     # Initialize all datasets
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-    # if tokenizer.pad_token is None:
-    #     tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-    #     tokenizer.pad_token = "[PAD]"
+    if tokenizer.pad_token is None:
+        tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        tokenizer.pad_token = "[PAD]"
 
     train_datasets, test_datasets = [], []
     for file_path in train_files:
