@@ -132,16 +132,16 @@ if __name__ == "__main__":
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
-        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        model_path="./Llama3.2-3B",
         results_dir="./results-llamba",
         root_dir="climate_text_dataset",
-        batch_size=8,
+        batch_size=16,
         num_epochs=20,
         gradient_accumulation_steps=8,
         max_token_len=512,
-        is_lora=False,
-        precision_opt=False,
-        gradient_acc=False,
+        is_lora=True,
+        precision_opt=True,
+        gradient_acc=True,
     )
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
@@ -151,12 +151,12 @@ if __name__ == "__main__":
         training_cfg=training_cfg,
     )
 
-    print("#################### GRADIENT ACCUMULATION TESTED ##################")
+    print("#################### ALL TESTED ##################")
 
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
-        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
+        model_path="./Llama3.2-3B",
         results_dir="./results-llamba",
         root_dir="climate_text_dataset",
         batch_size=32,

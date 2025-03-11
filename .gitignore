@@ -6,6 +6,7 @@ assignment-1/results/*
 assignment-1/results-gpt/* 
 assignment-1/results-llamba/*
 assignment-1/__pycache__/*
+assignment-1/Llama3.2-3B/*
 *.err 
 *.out
 __MACOSX/
