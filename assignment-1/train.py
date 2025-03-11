@@ -140,7 +140,7 @@ if __name__ == "__main__":
         # results_dir="./results-gpt",
         model_path="./Llama3.2-3B",
         # results_dir=f"./results-llamba-{string_local}",
-        results_dir="results-llamba-2025-03-11\ 17:11:54",
+        results_dir="results-llamba-2025-03-11_17:11:54",
         root_dir="climate_text_dataset",
         batch_size=32,
         num_epochs=5,
