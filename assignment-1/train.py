@@ -158,9 +158,9 @@ if __name__ == "__main__":
         precision_opt=True,
         gradient_acc=False,
     )
-    # print(f"config: {training_cfg}")
-    # last_checkpoint = train(training_cfg)
-    last_checkpoint = 10
+    print(f"config: {training_cfg}")
+    last_checkpoint = train(training_cfg)
+    # last_checkpoint = 10
     print(f"last_checkpoint: {last_checkpoint}")
     evaluate(
         finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
