@@ -2,7 +2,6 @@ import glob
 import os
 
 import numpy as np
-import pdfplumber
 import torch.utils.data as data
 from config import TrainingConfig
 from datasets import CausalLMDataset
