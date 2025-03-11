@@ -92,6 +92,7 @@ def train(training_cfg: TrainingConfig):
         dataloader_num_workers=8,
         weight_decay=0.01,
         fp16=training_cfg.precision_opt,  # TODO: Do ths bf16 as well?
+        bf16=training_cfg.precision_opt,
         logging_dir="./logs",
     )
 
@@ -100,7 +101,6 @@ def train(training_cfg: TrainingConfig):
             task_type=TaskType.CAUSAL_LM,
             r=8,
             lora_alpha=32,
-            # target_modules=["q_proj", "v_proj"],
             lora_dropout=0.1,
             bias="none",
         )
@@ -135,10 +135,10 @@ if __name__ == "__main__":
         model_path="./Llama3.2-3B",
         results_dir="./results-llamba",
         root_dir="climate_text_dataset",
-        batch_size=16,
-        num_epochs=20,
-        gradient_accumulation_steps=8,
-        max_token_len=512,
+        batch_size=1,
+        num_epochs=5,
+        gradient_accumulation_steps=1,
+        max_token_len=128,
         is_lora=True,
         precision_opt=True,
         gradient_acc=True,
@@ -146,55 +146,7 @@ if __name__ == "__main__":
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
     print(f"last_checkpoint: {last_checkpoint}")
-    #evaluate(
-    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-    #    training_cfg=training_cfg,
-    #)
-
-    print("#################### ALL TESTED ##################")
-
-    training_cfg = TrainingConfig(
-        # model_path="gpt2",
-        # results_dir="./results-gpt",
-        model_path="./Llama3.2-3B",
-        results_dir="./results-llamba-1",
-        root_dir="climate_text_dataset",
-        batch_size=32,
-        num_epochs=20,
-        gradient_accumulation_steps=16,
-        max_token_len=512,
-        is_lora=True,
-        precision_opt=False,
-        gradient_acc=False,
+    evaluate(
+        finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
+        training_cfg=training_cfg,
     )
-    print(f"config: {training_cfg}")
-    last_checkpoint = train(training_cfg)
-    print(f"last_checkpoint: {last_checkpoint}")
-    #evaluate(
-    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-    #    training_cfg=training_cfg,
-    #)
-
-    print("#################### LARGER BATCH TESTED ##################")
-
-    training_cfg = TrainingConfig(
-        # model_path="gpt2",
-        # results_dir="./results-gpt",
-        model_path="/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B",
-        results_dir="./results-llamba-2",
-        root_dir="climate_text_dataset",
-        batch_size=64,
-        num_epochs=20,
-        gradient_accumulation_steps=16,
-        max_token_len=512,
-        is_lora=True,
-        precision_opt=True,
-        gradient_acc=True,
-    )
-    print(f"config: {training_cfg}")
-    last_checkpoint = train(training_cfg)
-    print(f"last_checkpoint: {last_checkpoint}")
-    #evaluate(
-    #    finetuned_model_path=f"{training_cfg.results_dir}/checkpoint-{last_checkpoint}",
-    #    training_cfg=training_cfg,
-    #)
