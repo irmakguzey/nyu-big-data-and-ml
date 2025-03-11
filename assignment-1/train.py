@@ -132,9 +132,9 @@ if __name__ == "__main__":
     import time
 
     timestamp = time.time()
-
+    time_local = time.localtime(timestamp)
     # Format the time struct into a string
-    string_local = time.strftime("%Y-%m-%d %H:%M:%S", timestamp)
+    string_local = time.strftime("%Y-%m-%d %H:%M:%S", time_local)
     training_cfg = TrainingConfig(
         # model_path="gpt2",
         # results_dir="./results-gpt",
