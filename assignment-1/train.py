@@ -78,6 +78,11 @@ def train(training_cfg: TrainingConfig):
         )
     else:
         model = AutoModelForCausalLM.from_pretrained(training_cfg.model_path)
+
+    if training_cfg.gradient_acc:
+        model.enable_input_require_grads()
+        model.gradient_checkpointing_enable()
+
     train_dset, test_dset, tokenizer = get_datasets(
         root_dir=training_cfg.root_dir,
         model_name=training_cfg.model_path,
@@ -87,9 +92,8 @@ def train(training_cfg: TrainingConfig):
     print(f"train_dset len: {len(train_dset)}")
     print(f"len(test_dset): {len(test_dset)}")
     model.resize_token_embeddings(len(tokenizer))
-    if training_cfg.gradient_acc:
-        model.enable_input_require_grads()
-        model.gradient_checkpointing_enable()
+
+    # model.gradient_checkpointing_enable()
 
     # Define Training Arguments
     training_args = TrainingArguments(
@@ -137,6 +141,9 @@ def train(training_cfg: TrainingConfig):
 
     return last_checkpoint
 
+
+# TODO: Fix the gradient acc
+# TODO: Add terminal input to have multipkle runs
 
 if __name__ == "__main__":
 
