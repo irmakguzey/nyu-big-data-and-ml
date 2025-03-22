@@ -16,9 +16,6 @@ def preprocess_single_file(file_path):
     file_root = "/".join(file_path.split("/")[:-1])
     txt_path = f"{file_root}/{file_name}.txt"
 
-    # if os.path.exists(txt_path):
-    #     return txt_path
-
     SIZE_LIMIT = (
         7 * 1024 * 1024
     )  # We'll be only processing files that are smaller than 20MBs
@@ -33,14 +30,6 @@ def preprocess_single_file(file_path):
     with open(txt_path, "w", encoding="utf-8") as txt_file:
         for page in reader.pages:
             txt_file.write(page.extract_text() + "\n\n")
-
-    # with pdfplumber.open(file_path) as pdf:
-    #     text = "\n".join(
-    #         page.extract_text() for page in pdf.pages if page.extract_text()
-    #     )
-
-    # with open(txt_path, "w", encoding="utf-8") as f:
-    #     f.write(text)
 
     return txt_path
 

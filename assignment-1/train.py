@@ -149,7 +149,10 @@ if __name__ == "__main__":
     # Highest batch size with everything -> 64
     # Without gradient_acc -> 16
     # Without anything -> 1
-    # Only with lora -> 16
+    # Only with lora -> 8
+    # Lora + Precision -> 16
+    # Lora + GradAcc -> (32)
+    # NOTE: Precision Opt Makes things significantly faster
     timestamp = time.time()
     time_local = time.localtime(timestamp)
     # Format the time struct into a string
@@ -161,13 +164,13 @@ if __name__ == "__main__":
         results_dir=f"./results-llamba-{string_local}",
         # results_dir="results-llamba-2025-03-11_17:11:54",
         root_dir="climate_text_dataset",
-        batch_size=16,
-        num_epochs=5,
+        batch_size=64,
+        num_epochs=250,
         gradient_accumulation_steps=32,
         max_token_len=256,
         is_lora=True,  # Without any of them highest batch size: 1
-        precision_opt=False,  #
-        gradient_acc=False,  # Without this highest batch size is 16 - now 64 works
+        precision_opt=True,  #
+        gradient_acc=True,  # Without this highest batch size is 16 - now 64 works
     )
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
