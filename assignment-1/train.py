@@ -161,12 +161,12 @@ if __name__ == "__main__":
         # results_dir="results-llamba-2025-03-11_17:11:54",
         root_dir="climate_text_dataset",
         batch_size=16,
-        num_epochs=200,
+        num_epochs=5,
         gradient_accumulation_steps=32,
         max_token_len=256,
         is_lora=True,
         precision_opt=True,
-        gradient_acc=False,
+        gradient_acc=True,
     )
     print(f"config: {training_cfg}")
     last_checkpoint = train(training_cfg)
