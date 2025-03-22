@@ -131,3 +131,107 @@ max_token_len: 512
 checkpoint: 60
 perplexity: 9.716
 ###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: results-llamba-2025-03-11_17:11:54
+batch_size: 32
+num_epochs: 5
+gradient_accumulation_steps: 8
+is_lora: True
+precision_opt: True
+gradient_acc: False
+max_token_len: 128
+checkpoint: 10
+perplexity: 21.784
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_17:38:28
+batch_size: 64
+num_epochs: 5
+gradient_accumulation_steps: 8
+is_lora: True
+precision_opt: True
+gradient_acc: False
+max_token_len: 256
+checkpoint: 25
+perplexity: 21.659
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_17:45:11
+batch_size: 64
+num_epochs: 5
+gradient_accumulation_steps: 8
+is_lora: True
+precision_opt: True
+gradient_acc: True
+max_token_len: 256
+checkpoint: 5
+perplexity: 21.837
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_17:48:37
+batch_size: 128
+num_epochs: 5
+gradient_accumulation_steps: 16
+is_lora: True
+precision_opt: True
+gradient_acc: True
+max_token_len: 256
+checkpoint: 5
+perplexity: 21.810
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_17:53:50
+batch_size: 1024
+num_epochs: 5
+gradient_accumulation_steps: 16
+is_lora: True
+precision_opt: True
+gradient_acc: True
+max_token_len: 256
+checkpoint: 0
+perplexity: 21.871
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_18:00:22
+batch_size: 64
+num_epochs: 5
+gradient_accumulation_steps: 16
+is_lora: True
+precision_opt: True
+gradient_acc: True
+max_token_len: 256
+checkpoint: 0
+perplexity: 21.871
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_18:10:13
+batch_size: 16
+num_epochs: 5
+gradient_accumulation_steps: 32
+is_lora: True
+precision_opt: True
+gradient_acc: False
+max_token_len: 256
+checkpoint: 5
+perplexity: 21.820
+###################
+model_path: ./Llama3.2-3B
+root_dir: climate_text_dataset
+results_dir: ./results-llamba-03-11_18:16:23
+batch_size: 16
+num_epochs: 200
+gradient_accumulation_steps: 32
+is_lora: True
+precision_opt: True
+gradient_acc: False
+max_token_len: 256
+checkpoint: 200
+perplexity: 25.111
+###################
