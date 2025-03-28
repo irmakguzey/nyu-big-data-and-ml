@@ -5,3 +5,8 @@ peft
 PyPDF
 tiktoken
 blobfile
+scipy
+imageio
+opencv-python
+imageio-ffmpeg
+yacs

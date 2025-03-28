@@ -89,8 +89,6 @@ def train(training_cfg: TrainingConfig):
         preprocess=False,
         max_length=training_cfg.max_token_len,
     )
-    print(f"train_dset len: {len(train_dset)}")
-    print(f"len(test_dset): {len(test_dset)}")
     model.resize_token_embeddings(len(tokenizer))
 
     # Define Training Arguments
