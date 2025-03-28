@@ -1,0 +1,3 @@
+[submodule "project/submodules/hamer"]
+	path = project/submodules/hamer
+	url = https://github.com/geopavlakos/hamer
