@@ -99,10 +99,10 @@ def plot_random_files(pkl_dir, save_dir, num_files=20):
     # Process each selected file
     for i, pkl_file in enumerate(selected_files):
         file_path = os.path.join(pkl_dir, pkl_file)
-        print(f"Processing file {i+1}/{num_files}: {pkl_file}")
 
         # Load and visualize
         img, traj, obj = load_img_and_traj(file_path)
+        print(f"Processing file {i+1}/{num_files}: {pkl_file} | Object: {obj}")
         visualize_traj_and_bbox(
             img,
             traj,
