@@ -83,9 +83,6 @@ class Workspace:
         # if self.cfg.pipeline_parallelism:
         #     model = Pipe(model, balance=[3, 3], devices=[0, 1])
 
-        device = torch.device(f"cuda:{rank}")
-        model = model.to(device)
-
         return model
 
     def train_epoch(self, rank, model):
@@ -117,14 +114,14 @@ class Workspace:
 
     def eval_epoch(self, rank, model):
         device = torch.device(f"cuda:{rank}")
-        model.train()
+        model.eval()
         test_loss = 0
         for batch in self.test_loader:
             inputs = batch["input_ids"].to(device)
             labels = batch["labels"].to(device)
             attention_mask = batch["attention_mask"].to(device)
 
-            with torch.no_grad:
+            with torch.no_grad():
                 outputs = model(
                     inputs,
                     labels=labels,
@@ -138,7 +135,13 @@ class Workspace:
         return test_loss / len(self.test_loader)
 
     def _save_checkpoint(self, model, checkpoint_type):
-        model.save_pretrained(f"{self.results_dir}/epoch-{checkpoint_type}-checkpoint")
+        if isinstance(model, torch.nn.parallel.DistributedDataParallel):
+            model_to_save = model.module  # Unwrap the actual model
+        else:
+            model_to_save = model
+        model_to_save.save_pretrained(
+            f"{self.results_dir}/epoch-{checkpoint_type}-checkpoint"
+        )
         self.tokenizer.save_pretrained(
             f"{self.results_dir}/epoch-{checkpoint_type}-checkpoint"
         )
@@ -146,64 +149,77 @@ class Workspace:
     def train(self, rank):
         # Create default process group
         dist.init_process_group("gloo", rank=rank, world_size=self.world_size)
-        dist.barrier()  # Wait for all of the processes to start
+        # dist.barrier()  # Wait for all of the processes to start
 
-        eval_every_epoch = Every(self.cfg.eval_every)
+        try:
+            eval_every_epoch = Every(self.cfg.eval_every)
 
-        # Get dataloaders
-        self._get_dataloaders()
-        print(f"Received dataloaders")
+            # Get dataloaders
+            self._get_dataloaders()
+            print(f"Received dataloaders")
 
-        # Set the device
-        torch.cuda.set_device(rank)
-        device = torch.device(f"cuda:{rank}")
+            # Set the device
+            torch.cuda.set_device(rank)
+            device = torch.device(f"cuda:{rank}")
 
-        # Load the model
-        model = self._get_model(rank)
-        # Setup optimizer
-        self.optimizer = torch.optim.AdamW(
-            model.parameters(), lr=5e-4, weight_decay=1e-4
-        )
+            # Load the model
+            model = self._get_model(rank)
+            # Setup optimizer
+            self.optimizer = torch.optim.AdamW(
+                model.parameters(), lr=5e-4, weight_decay=1e-4
+            )
 
-        best_loss = torch.inf
+            best_loss = torch.inf
 
-        # Initialize pbar
-        if rank == 0:
-            print("Starting training...")
-            pbar = tqdm(total=self.cfg.num_epochs)
-            log_file_path = os.path.join(self.results_dir, "training_log.txt")
-            with open(log_file_path, "w") as f:
-                f.write("Training Log\n")
-                f.write("=============\n")
-                f.write("Epoch,Train Loss,Epoch Time,Eval Loss,Best Loss\n")
-
-        # Start the training
-        for epoch in range(self.cfg.num_epochs):
-            train_loss, time_spent = self.train_epoch(rank, model)
-
-            if eval_every_epoch(epoch):
-                dist.barrier()
-                if rank == 0:
-                    eval_loss = self.eval_epoch(rank, model)
-                    self._save_checkpoint(model=model, checkpoint_type=epoch + 1)
-
-                    if eval_loss < best_loss:
-                        best_loss = eval_loss
-                        self._save_checkpoint(model=model, checkpoint_type="best")
-
+            # Initialize pbar
             if rank == 0:
-                pbar.update(1)
-                pbar.set_description(
-                    f"Epoch {epoch + 1}/{self.cfg.num_epochs}, Train Loss: {train_loss:.3f}, Best Loss: {best_loss:.3f}"
-                )
-                with open(log_file_path, "a") as f:
-                    f.write(
-                        f"{epoch + 1},{train_loss:.3f},"
-                        f"{time_spent:3.f},"
-                        f"{'N/A' if best_loss == torch.inf else best_loss:.3f}\n"
+                print("Starting training...")
+                pbar = tqdm(total=self.cfg.num_epochs)
+                log_file_path = os.path.join(self.results_dir, "training_log.txt")
+                with open(log_file_path, "w") as f:
+                    f.write("Training Log\n")
+                    f.write("=============\n")
+                    f.write("Epoch|Train Loss|Epoch Time|Eval Loss|Best Loss\n")
+
+            # Start the training
+            for epoch in range(self.cfg.num_epochs):
+                train_loss, time_spent = self.train_epoch(rank, model)
+
+                if eval_every_epoch(epoch) and rank == 0:
+                    # dist.barrier()
+                    if rank == 0:
+                        eval_loss = self.eval_epoch(rank, model)
+                        self._save_checkpoint(model=model, checkpoint_type=epoch + 1)
+
+                        if eval_loss < best_loss:
+                            best_loss = eval_loss
+                            self._save_checkpoint(model=model, checkpoint_type="best")
+
+                if rank == 0:
+                    pbar.update(1)
+                    pbar.set_description(
+                        f"Epoch {epoch + 1}/{self.cfg.num_epochs}, Train Loss: {train_loss:.3f}, Best Loss: {best_loss:.3f}"
+                    )
+                    eval_loss_str = (
+                        f"{eval_loss:.3f}" if eval_every_epoch(epoch) else "N/A"
+                    )
+                    best_loss_str = (
+                        f"{best_loss:.3f}" if best_loss != torch.inf else "N/A"
                     )
 
-        dist.barrier()
+                    with open(log_file_path, "a") as f:
+                        f.write(
+                            f"{epoch + 1}|{train_loss:.3f}|"
+                            f"{time_spent:.3f}|{eval_loss_str}|{best_loss_str}\n"
+                        )
+        except KeyboardInterrupt:
+            # dist.barrier()
+            dist.destroy_process_group()
+            if rank == 0:
+                pbar.close()
+
+        # dist.barrier()
+        dist.destroy_process_group()
         if rank == 0:
             pbar.close()
 
@@ -257,7 +273,7 @@ def main() -> None:
         results_dir=f"./results-gpt-{string_local}",
         root_dir="climate_text_dataset",
         batch_size=8,
-        num_epochs=10,
+        num_epochs=11,
         eval_every=5,
         max_token_len=256,
         data_parallelism=True,

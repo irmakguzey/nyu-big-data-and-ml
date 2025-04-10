@@ -12,3 +12,5 @@ assignment-1/Llama3.2-3B/*
 __MACOSX/
 *.mp4 
 *.png
+assignment-2/results* 
+*.txt
