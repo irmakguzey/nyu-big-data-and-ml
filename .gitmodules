@@ -1,3 +1,6 @@
 [submodule "project/submodules/hamer"]
 	path = project/submodules/hamer
 	url = https://github.com/geopavlakos/hamer
+[submodule "assignment-2/submodules/nanotron"]
+	path = assignment-2/submodules/nanotron
+	url = https://github.com/huggingface/nanotron.git
