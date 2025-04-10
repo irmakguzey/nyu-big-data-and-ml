@@ -39,10 +39,16 @@ class Workspace:
             max_length=self.cfg.max_token_len,
         )
 
-        train_sampler = data.DistributedSampler(
-            train_dset, drop_last=True, shuffle=True
-        )
-        test_sampler = data.DistributedSampler(test_dset, drop_last=True, shuffle=False)
+        if self.cfg.data_parallelism or self.cfg.model_parallelism:
+            train_sampler = data.DistributedSampler(
+                train_dset, drop_last=True, shuffle=True
+            )
+            test_sampler = data.DistributedSampler(
+                test_dset, drop_last=True, shuffle=False
+            )
+        else:
+            train_sampler = None
+            test_sampler = None
 
         self.train_loader = data.DataLoader(
             train_dset,
@@ -59,11 +65,6 @@ class Workspace:
             sampler=test_sampler,
         )  # NOTE: You might need to return these loaders in the future
 
-        # return train_loader, test_loader
-
-    # def train_epoch(self, rank, train_loader):
-    #     for batch in train_loader:
-
     # This will have all the parallelism configs to be added
     def _get_model(self, rank):
         model = AutoModelForCausalLM.from_pretrained(self.cfg.model_path)
@@ -78,7 +79,13 @@ class Workspace:
             )
 
         if self.cfg.model_parallelism:
-            model = parallelize_module(model, parallel_mode="column", devices=[0, 1])
+            # model = parallelize_module(model, parallel_mode="column", devices=[0, 1])
+            # model = model.parallize()
+
+            for name, module in model.named_modules():
+                print(name, type(module))
+
+                return None
 
         # if self.cfg.pipeline_parallelism:
         #     model = Pipe(model, balance=[3, 3], devices=[0, 1])
@@ -91,6 +98,9 @@ class Workspace:
         train_loss = 0
 
         begin = time.time()
+        if self.cfg.model_parallelism:
+            dist.barrier()
+
         for batch in self.train_loader:
             inputs = batch["input_ids"].to(device)
             labels = batch["labels"].to(device)
@@ -108,6 +118,9 @@ class Workspace:
             self.optimizer.step()
 
             train_loss += loss.item()
+
+        if self.cfg.model_parallelism:
+            dist.barrier()
 
         end = time.time()
         return train_loss / len(self.train_loader), end - begin
@@ -149,14 +162,12 @@ class Workspace:
     def train(self, rank):
         # Create default process group
         dist.init_process_group("gloo", rank=rank, world_size=self.world_size)
-        # dist.barrier()  # Wait for all of the processes to start
 
         try:
             eval_every_epoch = Every(self.cfg.eval_every)
 
             # Get dataloaders
             self._get_dataloaders()
-            print(f"Received dataloaders")
 
             # Set the device
             torch.cuda.set_device(rank)
@@ -177,7 +188,9 @@ class Workspace:
                 pbar = tqdm(total=self.cfg.num_epochs)
                 log_file_path = os.path.join(self.results_dir, "training_log.txt")
                 with open(log_file_path, "w") as f:
-                    f.write("Training Log\n")
+                    f.write("Training Log for Config\n")
+                    for key, value in self.cfg.__dict__.items():
+                        f.write(f"{key}: {value}\n")
                     f.write("=============\n")
                     f.write("Epoch|Train Loss|Epoch Time|Eval Loss|Best Loss\n")
 
@@ -185,7 +198,7 @@ class Workspace:
             for epoch in range(self.cfg.num_epochs):
                 train_loss, time_spent = self.train_epoch(rank, model)
 
-                if eval_every_epoch(epoch) and rank == 0:
+                if eval_every_epoch(epoch):
                     # dist.barrier()
                     if rank == 0:
                         eval_loss = self.eval_epoch(rank, model)
@@ -194,6 +207,8 @@ class Workspace:
                         if eval_loss < best_loss:
                             best_loss = eval_loss
                             self._save_checkpoint(model=model, checkpoint_type="best")
+
+                    dist.barrier()  # NOTE: I'm not sure about this
 
                 if rank == 0:
                     pbar.update(1)
@@ -218,7 +233,7 @@ class Workspace:
             if rank == 0:
                 pbar.close()
 
-        # dist.barrier()
+        dist.barrier()
         dist.destroy_process_group()
         if rank == 0:
             pbar.close()
@@ -276,8 +291,8 @@ def main() -> None:
         num_epochs=11,
         eval_every=5,
         max_token_len=256,
-        data_parallelism=True,
-        model_parallelism=False,
+        data_parallelism=False,
+        model_parallelism=True,
         pipeline_parallelism=False,
         num_gpus=4,
     )
