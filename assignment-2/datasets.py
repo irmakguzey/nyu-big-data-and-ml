@@ -19,6 +19,9 @@ class CausalLMDataset(Dataset):
         # Tokenize the entire text corpus
         tokenized_text = tokenizer(
             text,
+            # return_tensors="pt",
+            truncation=True,
+            # padding=True,
             max_length=max_length,  # Ensure it fits model constraints
         )["input_ids"]
 
