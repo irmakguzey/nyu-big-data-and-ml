@@ -57,3 +57,6 @@ class CausalLMDataset(Dataset):
         }
 
         return return_dict
+
+    def update_consumption_metrics(self, **kwargs):
+        pass

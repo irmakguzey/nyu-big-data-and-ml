@@ -2,7 +2,7 @@ bitsandbytes
 transformers
 accelerate
 peft
-PyPDF
+PyPDF2
 tiktoken
 blobfile
 scipy

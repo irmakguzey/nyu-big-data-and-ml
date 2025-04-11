@@ -3,11 +3,24 @@ import os
 
 import numpy as np
 import torch.utils.data as data
+from causal_lm_dataset import CausalLMDataset
 from config import TrainingConfig
-from datasets import CausalLMDataset
 from PyPDF2 import PdfReader
+from torch.utils.data import ConcatDataset
 from tqdm import tqdm
 from transformers import AutoTokenizer
+
+
+class NanotronConcatDataset(ConcatDataset):
+    def update_consumption_metrics(self, **kwargs):
+        # Optional: update all children
+        # for dataset in self.datasets:
+        #     if hasattr(dataset, "update_consumption_metrics"):
+        #         dataset.update_consumption_metrics(num_consumed_samples)
+        pass
+
+    def get_consumption_stats(self, **kwargs):
+        pass
 
 
 def preprocess_single_file(file_path):
@@ -73,7 +86,7 @@ def get_datasets(
                 file_path=file_path, tokenizer=tokenizer, max_length=max_length
             )
         )
-    train_dset = data.ConcatDataset(train_datasets)
+    train_dset = NanotronConcatDataset(train_datasets)
 
     for file_path in test_files:
         test_datasets.append(
@@ -81,7 +94,7 @@ def get_datasets(
                 file_path=file_path, tokenizer=tokenizer, max_length=max_length
             )
         )
-    test_dset = data.ConcatDataset(test_datasets)
+    test_dset = NanotronConcatDataset(test_datasets)
 
     return train_dset, test_dset, tokenizer
 

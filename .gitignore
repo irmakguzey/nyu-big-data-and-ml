@@ -13,4 +13,7 @@ __MACOSX/
 *.mp4 
 *.png
 assignment-2/results* 
+assignment-2/__pycache__/*
+assignment-2/tb_logs/*
+assignment-2/wandb/*
 *.txt
