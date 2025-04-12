@@ -2,7 +2,7 @@ checkpoints:
   checkpoint_interval: 1000
   checkpoints_path: checkpoints
   checkpoints_path_is_shared_file_system: false
-  resume_checkpoint_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
+  resume_checkpoint_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
   save_initial_state: false
 data_stages:
 - data:
@@ -73,14 +73,14 @@ parallelism:
   expert_parallel_size: 1
   pp: 1
   pp_engine: 1f1b
-  tp: 4
+  tp: 1
   tp_linear_async_communication: true
   tp_mode: REDUCE_SCATTER
 profiler:
   profiler_export_path: ./tb_logs/fix/
 tokenizer:
   tokenizer_max_length: null
-  tokenizer_name_or_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
+  tokenizer_name_or_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
   tokenizer_revision: null
 tokens:
   batch_accumulation_per_replica: 8 # nb_micro_batch_size
