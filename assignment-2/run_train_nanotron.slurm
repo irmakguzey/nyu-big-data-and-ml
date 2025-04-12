@@ -1,7 +1,7 @@
 #!/bin/sh
 #SBATCH --job-name=job_wgpu
 #SBATCH --account=csci_ga_3033_077-2025sp
-#SBATCH --partition=c12m85-a100-2
+#SBATCH --partition=c24m170-a100-2
 #SBATCH --open-mode=append
 #SBATCH --output=./%j_%x.out
 #SBATCH --error=./%j_%x.err
