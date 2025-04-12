@@ -2,7 +2,8 @@ checkpoints:
   checkpoint_interval: 1000
   checkpoints_path: checkpoints
   checkpoints_path_is_shared_file_system: false
-  resume_checkpoint_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  # resume_checkpoint_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  resume_checkpoint_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
   save_initial_state: false
 data_stages:
 - data:
@@ -37,7 +38,7 @@ model:
     hidden_size: 2048
     initializer_range: 0.02
     intermediate_size: 11008
-    is_llama_config: true
+    is_llama_config: false
     max_position_embeddings: 128256
     num_attention_heads: 16
     num_hidden_layers: 28
@@ -50,7 +51,7 @@ model:
     use_cache: true
     vocab_size: 128256
 optimizer:
-  accumulate_grad_in_fp32: true
+  accumulate_grad_in_fp32: false
   clip_grad: 1.0
   learning_rate_scheduler:
     learning_rate: 0.0003
@@ -69,21 +70,33 @@ optimizer:
   weight_decay: 0.01
   zero_stage: 0
 parallelism:
-  dp: 1
-  expert_parallel_size: 1
-  pp: 1
-  pp_engine: 1f1b
-  tp: 1
-  tp_linear_async_communication: true
-  tp_mode: REDUCE_SCATTER
+  # dp: 1
+  # expert_parallel_size: 1
+  # pp: 4
+  # pp_engine: 1f1b
+  # tp: 1
+  # tp_linear_async_communication: true
+  # tp_mode: REDUCE_SCATTER
+    context_parallel_size: 1
+    dp: 1
+    expert_parallel_size: 1
+    moe_layer_recompute: false
+    pp: 2
+    pp_engine: 1f1b
+    recompute_layer: true
+    tp: 1
+    tp_linear_async_communication: true
+    tp_mode: REDUCE_SCATTER
+    tp_recompute_allgather: true
 profiler:
   profiler_export_path: ./tb_logs/fix/
 tokenizer:
   tokenizer_max_length: null
-  tokenizer_name_or_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  # tokenizer_name_or_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  tokenizer_name_or_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
   tokenizer_revision: null
 tokens:
-  batch_accumulation_per_replica: 8 # nb_micro_batch_size
+  batch_accumulation_per_replica: 32 # nb_micro_batch_size
   limit_test_batches: 0
   limit_val_batches: 0
   micro_batch_size: 8
