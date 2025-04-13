@@ -7,7 +7,7 @@
 #SBATCH --error=./%j_%x.err
 #SBATCH --export=ALL
 #SBATCH --time=06:00:00
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:1
 #SBATCH --requeue
 #SBATCH --mem=25G
 #SBATCH --mail-type=BEGIN
