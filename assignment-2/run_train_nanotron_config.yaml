@@ -2,8 +2,8 @@ checkpoints:
   checkpoint_interval: 1000
   checkpoints_path: checkpoints
   checkpoints_path_is_shared_file_system: false
-  resume_checkpoint_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
-  # resume_checkpoint_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
+  # resume_checkpoint_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  resume_checkpoint_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
   save_initial_state: false
 data_stages:
 - data:
@@ -26,6 +26,30 @@ logging:
   log_level: info
   log_level_replica: info
 model:
+  # ===== gpt2 config =====  NOTE: I don't think we can train gpt2 with nanotron
+  # ddp_bucket_cap_mb: 25
+  # dtype: bfloat16
+  # init_method:
+  #   # _target_: RandomInit
+  #   std: 0.025
+  #   # use_mup: false
+  # make_vocab_size_divisible_by: 1
+  # model_config:
+  #   _target_: GPT2Config  # Add this line to specify the config class
+  #   activation_function: "gelu_new"
+  #   bos_token_id: 50256
+  #   eos_token_id: 50256
+  #   hidden_size: 768
+  #   initializer_range: 0.02
+  #   intermediate_size: 3072
+  #   layer_norm_epsilon: 1e-5
+  #   max_position_embeddings: 1024
+  #   num_attention_heads: 12
+  #   num_hidden_layers: 12
+  #   pad_token_id: null
+  #   tie_word_embeddings: true
+  #   vocab_size: 50257
+  # ===== llama config ===== 
   ddp_bucket_cap_mb: 25
   dtype: bfloat16
   init_method:
@@ -38,11 +62,11 @@ model:
     hidden_size: 2048
     initializer_range: 0.02
     intermediate_size: 11008
-    is_llama_config: false
+    is_llama_config: true
     max_position_embeddings: 128256
     num_attention_heads: 16
     num_hidden_layers: 28
-    num_key_value_heads: 4 # should be bigger than tp
+    num_key_value_heads: 2
     pad_token_id: null
     pretraining_tp: 1
     rms_norm_eps: 1.0e-05
@@ -68,7 +92,7 @@ optimizer:
     name: adamW
     torch_adam_is_fused: true
   weight_decay: 0.01
-  zero_stage: 0
+  zero_stage: 1
 parallelism:
   # dp: 1
   # expert_parallel_size: 1
@@ -78,10 +102,10 @@ parallelism:
   # tp_linear_async_communication: true
   # tp_mode: REDUCE_SCATTER
     context_parallel_size: 1
-    dp: 1
+    dp: 2
     expert_parallel_size: 1
     moe_layer_recompute: false
-    pp: 2
+    pp: 1
     pp_engine: 1f1b
     recompute_layer: true
     tp: 1
@@ -92,14 +116,14 @@ profiler:
   profiler_export_path: ./tb_logs/fix/
 tokenizer:
   tokenizer_max_length: null
-  tokenizer_name_or_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
-  # tokenizer_name_or_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
+  # tokenizer_name_or_path: /scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B
+  tokenizer_name_or_path: /home/irmak/Workspace/nyu-big-data-and-ml/assignment-2/results-gpt-04-10_11:34:16/epoch-1-checkpoint
   tokenizer_revision: null
 tokens:
-  batch_accumulation_per_replica: 32 # nb_micro_batch_size
+  batch_accumulation_per_replica: 64 # nb_micro_batch_size
   limit_test_batches: 0
   limit_val_batches: 0
-  micro_batch_size: 8
+  micro_batch_size: 2
   sequence_length: 256
   train_steps: 2000
   val_check_interval: -1

@@ -19,7 +19,7 @@ general:
   consumed_train_samples: null
   ignore_sanity_checks: true
   project: nyu-bdml-2-nanotron-greene
-  run: llama_%jobid-pp
+  run: llama_%jobid-tp
   seed: 42
   step: null
 
@@ -56,16 +56,19 @@ model:
     vocab_size: 128256
 
 parallelism:
-    pp: 2
+    pp: 1
     pp_engine: 1f1b
     context_parallel_size: 1
     dp: 1
-    tp: 1
+    tp: 2
     recompute_layer: true
     expert_parallel_size: 1
+    tp_linear_async_communication: true
+    tp_mode: REDUCE_SCATTER
+    tp_recompute_allgather: true
 
 optimizer:
-    zero_stage: 0
+    zero_stage: 1
     accumulate_grad_in_fp32: true
     clip_grad: 1.0
     learning_rate_scheduler:
