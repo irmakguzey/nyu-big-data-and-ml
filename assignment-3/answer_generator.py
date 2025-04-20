@@ -12,7 +12,7 @@ np.set_printoptions(precision=3, suppress=True)
 
 # This class will input param for using RAG or not
 class AnswerGenerator:
-    def __init__(self, lm_path, use_rag, rag_type=None):
+    def __init__(self, lm_path):
         self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
         self.generator = AutoModelForSeq2SeqLM.from_pretrained(lm_path)
 
@@ -34,34 +34,43 @@ class AnswerGenerator:
             batch_size=64,
             num_workers=4,
         )
-        if use_rag:
-            self.use_rag = True
-            # self.set_encoder(encoder_path)
-            # self._set_doc_embeddings()
-            # self.set_index(rag_type)
+        # if use_rag:
+        #     self.use_rag = True
+        # self.set_encoder(encoder_path)
+        # self._set_doc_embeddings()
+        # self.set_index(rag_type)
+
+    def set_use_rag(self, use_rag):
+        self.use_rag = use_rag
 
     def set_encoder(self, encoder_path):
-        self.encoder = SentenceTransformer(encoder_path)
-        self._set_doc_embeddings()
+        if self.use_rag:
+            self.encoder = SentenceTransformer(encoder_path)
+            self._set_doc_embeddings()
+        else:
+            print("set_encoder - Not using RAG passing")
 
     def set_index(self, rag_type):
-        if rag_type == "index_flat_l2":
-            self.index = faiss.IndexFlatL2(self.doc_embeddings.shape[1])
-            self.index.add(self.doc_embeddings)
-        elif rag_type == "index_hnsw":
-            self.index = faiss.IndexHNSWFlat(self.doc_embeddings.shape[1], 32)
-            self.index.add(self.doc_embeddings)
-        elif rag_type == "index_ivf":
-            N, d = self.doc_embeddings.shape
-            # nlist = int(np.sqrt(N))  # ~100
-            nlist = 15
-            quantizer = faiss.IndexFlatL2(d)
-            self.index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
-            self.index.train(self.doc_embeddings)
-            self.index.add(self.doc_embeddings)
-            self.index.nprobe = 16
+        if self.use_rag:
+            if rag_type == "index_flat_l2":
+                self.index = faiss.IndexFlatL2(self.doc_embeddings.shape[1])
+                self.index.add(self.doc_embeddings)
+            elif rag_type == "index_hnsw":
+                self.index = faiss.IndexHNSWFlat(self.doc_embeddings.shape[1], 32)
+                self.index.add(self.doc_embeddings)
+            elif rag_type == "index_ivf":
+                N, d = self.doc_embeddings.shape
+                # nlist = int(np.sqrt(N))  # ~100
+                nlist = 15
+                quantizer = faiss.IndexFlatL2(d)
+                self.index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
+                self.index.train(self.doc_embeddings)
+                self.index.add(self.doc_embeddings)
+                self.index.nprobe = 16
+            else:
+                raise ValueError(f"Invalid RAG type: {rag_type}")
         else:
-            raise ValueError(f"Invalid RAG type: {rag_type}")
+            print("set_index - Not using RAG passing")
 
     def _set_doc_embeddings(self):
         # Convert all documents from train loader into embeddings
@@ -104,33 +113,80 @@ class AnswerGenerator:
 
 
 if __name__ == "__main__":
-    gen = AnswerGenerator(
-        lm_path="google/flan-t5-base",
-        use_rag=True,
+    finetuned_llama_path = "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/results-llamba-03-11_18:16:23/checkpoint-200"
+    pretrained_llama_path = (
+        "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B"
     )
 
+    # llama_path_dict = {
+    #     "finetuned": "google/flan-t5-base",
+    #     "pretrained": "google/flan-t5-base",
+    # }
+    llama_path_dict = {
+        "finetuned": finetuned_llama_path,
+        "pretrained": pretrained_llama_path,
+    }
+
+    model_types = ["finetuned", "pretrained"]
+    use_rags = [False, True]
+    encoder_names = ["all-MiniLM-L6-v2", "BAAI/bge-large-en"]
+    rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
+
     # Open log file in append mode
+    query = "How does CO2 affect the climate?"
     timestamp = time.strftime("%m%d-%H%M%S")
     log_filename = f"log_{timestamp}.txt"
 
-    query = "How does CO2 affect the climate?"
-    # encoder_names = ["BAAI/bge-large-en", "all-MiniLM-L6-v2"]
-    encoder_names = ["all-MiniLM-L6-v2"]
-    # rag_types = ["index_flat_l2", "index_hnsw", "index_ivf"]
-    rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
-    for encoder_name in encoder_names:
-        gen.set_encoder(encoder_name)
-        for rag_type in rag_types:
-            gen.set_index(rag_type)
-            time_start = time.time()
-            answer = gen.generate_answer(query, top_k=10)
-            time_end = time.time()
-            print(answer)
-            print(f"RAG type: {rag_type} - Time taken: {time_end - time_start} seconds")
+    for model_type in model_types:
+        gen = AnswerGenerator(
+            lm_path=llama_path_dict[model_type],
+        )
+        for use_rag in use_rags:
+            gen.set_use_rag(use_rag)
+            if use_rag:
+                for encoder_name in encoder_names:
+                    gen.set_encoder(encoder_name)
+                    for rag_type in rag_types:
+                        gen.set_index(rag_type)
 
-            with open(log_filename, "a") as f:
-                f.write(f"\nEncoder: {encoder_name}\n")
-                f.write(f"RAG type: {rag_type}\n")
-                f.write(f"Time taken: {time_end - time_start} seconds\n")
-                f.write(f"Query: {query} - Answer: {answer}\n")
-                f.write("-" * 50 + "\n")
+                        time_start = time.time()
+                        answer = gen.generate_answer(query, top_k=10)
+                        time_end = time.time()
+                        time_spent = time_end - time_start
+                        print(answer)
+                        print(
+                            f"RAG type: {rag_type} - Time taken: {time_spent:.3f} seconds"
+                        )
+                        with open(log_filename, "a") as f:
+                            f.write(f"Model type: {model_type}\n")
+                            f.write(f"Use RAG: {use_rag}\n")
+                            f.write(f"Encoder: {encoder_name}\n")
+                            f.write(f"RAG type: {rag_type}\n")
+                            f.write(f"Time taken: {time_spent:.3f} seconds\n")
+                            f.write(f"Query: {query} - Answer: {answer}\n")
+                            f.write("-" * 50 + "\n")
+
+            else:
+
+                time_start = time.time()
+                answer = gen.generate_answer(query, top_k=10)
+                time_end = time.time()
+                time_spent = time_end - time_start
+                print(answer)
+                print(f"Time taken: {time_spent:.3f} seconds")
+                with open(log_filename, "a") as f:
+                    f.write(f"Model type: {model_type}\n")
+                    f.write(f"Use RAG: {use_rag}\n")
+                    f.write(f"Time taken: {time_spent:.3f} seconds\n")
+                    f.write(f"Query: {query} - Answer: {answer}\n")
+                    f.write("-" * 50 + "\n")
+
+    # gen = AnswerGenerator(
+    #     lm_path="google/flan-t5-base",
+    #     use_rag=True,
+    # )
+
+    # for encoder_name in encoder_names:
+    #     gen.set_encoder(encoder_name)
+    #     for rag_type in rag_types:
+    #         gen.set_index(rag_type)
