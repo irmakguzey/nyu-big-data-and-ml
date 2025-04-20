@@ -118,14 +118,14 @@ if __name__ == "__main__":
         "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B"
     )
 
-    # llama_path_dict = {
-    #     "finetuned": "google/flan-t5-base",
-    #     "pretrained": "google/flan-t5-base",
-    # }
     llama_path_dict = {
-        "finetuned": finetuned_llama_path,
-        "pretrained": pretrained_llama_path,
+        "finetuned": "google/flan-t5-base",
+        "pretrained": "google/flan-t5-base",
     }
+    # llama_path_dict = {
+    #     "finetuned": finetuned_llama_path,
+    #     "pretrained": pretrained_llama_path,
+    # }
 
     model_types = ["finetuned", "pretrained"]
     use_rags = [False, True]
