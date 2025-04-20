@@ -118,14 +118,14 @@ if __name__ == "__main__":
         "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B"
     )
 
-    llama_path_dict = {
-        "finetuned": "google/flan-t5-base",
-        "pretrained": "google/flan-t5-base",
-    }
     # llama_path_dict = {
-    #     "finetuned": finetuned_llama_path,
-    #     "pretrained": pretrained_llama_path,
+    #     "finetuned": "google/flan-t5-base",
+    #     "pretrained": "google/flan-t5-base",
     # }
+    llama_path_dict = {
+        "finetuned": finetuned_llama_path,
+        "pretrained": pretrained_llama_path,
+    }
 
     model_types = ["finetuned", "pretrained"]
     use_rags = [False, True]
@@ -133,53 +133,61 @@ if __name__ == "__main__":
     rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
 
     # Open log file in append mode
-    query = "How does CO2 affect the climate?"
+    # query = "How does CO2 affect the climate?"
     timestamp = time.strftime("%m%d-%H%M%S")
     log_filename = f"log_{timestamp}.txt"
 
-    for model_type in model_types:
-        gen = AnswerGenerator(
-            lm_path=llama_path_dict[model_type],
-        )
-        for use_rag in use_rags:
-            gen.set_use_rag(use_rag)
-            if use_rag:
-                for encoder_name in encoder_names:
-                    gen.set_encoder(encoder_name)
-                    for rag_type in rag_types:
-                        gen.set_index(rag_type)
+    queries = [
+        "What is a method to measure CO2 leakage from carbon capture and sequestration?",
+        "How are Class Activation Mapping methods used to improve CO2 leakage detection from carbon capture and sequestration?",
+        "How can machine learning be used to predict vegetation health and mitigate the impacts of agricultural drought in Kenya?",
+        "How can machine learning practitioners estimate the energy consumption of their models without training them?",
+    ]
 
-                        time_start = time.time()
-                        answer = gen.generate_answer(query, top_k=10)
-                        time_end = time.time()
-                        time_spent = time_end - time_start
-                        print(answer)
-                        print(
-                            f"RAG type: {rag_type} - Time taken: {time_spent:.3f} seconds"
-                        )
-                        with open(log_filename, "a") as f:
-                            f.write(f"Model type: {model_type}\n")
-                            f.write(f"Use RAG: {use_rag}\n")
-                            f.write(f"Encoder: {encoder_name}\n")
-                            f.write(f"RAG type: {rag_type}\n")
-                            f.write(f"Time taken: {time_spent:.3f} seconds\n")
-                            f.write(f"Query: {query} - Answer: {answer}\n")
-                            f.write("-" * 50 + "\n")
+    for query in queries:
+        for model_type in model_types:
+            gen = AnswerGenerator(
+                lm_path=llama_path_dict[model_type],
+            )
+            for use_rag in use_rags:
+                gen.set_use_rag(use_rag)
+                if use_rag:
+                    for encoder_name in encoder_names:
+                        gen.set_encoder(encoder_name)
+                        for rag_type in rag_types:
+                            gen.set_index(rag_type)
 
-            else:
+                            time_start = time.time()
+                            answer = gen.generate_answer(query, top_k=10)
+                            time_end = time.time()
+                            time_spent = time_end - time_start
+                            print(answer)
+                            print(
+                                f"RAG type: {rag_type} - Time taken: {time_spent:.3f} seconds"
+                            )
+                            with open(log_filename, "a") as f:
+                                f.write(f"Model type: {model_type}\n")
+                                f.write(f"Use RAG: {use_rag}\n")
+                                f.write(f"Encoder: {encoder_name}\n")
+                                f.write(f"RAG type: {rag_type}\n")
+                                f.write(f"Time taken: {time_spent:.3f} seconds\n")
+                                f.write(f"Query: {query} - Answer: {answer}\n")
+                                f.write("-" * 50 + "\n")
 
-                time_start = time.time()
-                answer = gen.generate_answer(query, top_k=10)
-                time_end = time.time()
-                time_spent = time_end - time_start
-                print(answer)
-                print(f"Time taken: {time_spent:.3f} seconds")
-                with open(log_filename, "a") as f:
-                    f.write(f"Model type: {model_type}\n")
-                    f.write(f"Use RAG: {use_rag}\n")
-                    f.write(f"Time taken: {time_spent:.3f} seconds\n")
-                    f.write(f"Query: {query} - Answer: {answer}\n")
-                    f.write("-" * 50 + "\n")
+                else:
+
+                    time_start = time.time()
+                    answer = gen.generate_answer(query, top_k=10)
+                    time_end = time.time()
+                    time_spent = time_end - time_start
+                    print(answer)
+                    print(f"Time taken: {time_spent:.3f} seconds")
+                    with open(log_filename, "a") as f:
+                        f.write(f"Model type: {model_type}\n")
+                        f.write(f"Use RAG: {use_rag}\n")
+                        f.write(f"Time taken: {time_spent:.3f} seconds\n")
+                        f.write(f"Query: {query} - Answer: {answer}\n")
+                        f.write("-" * 50 + "\n")
 
     # gen = AnswerGenerator(
     #     lm_path="google/flan-t5-base",
