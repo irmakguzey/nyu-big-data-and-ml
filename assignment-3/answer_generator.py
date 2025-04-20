@@ -142,6 +142,7 @@ if __name__ == "__main__":
         "How are Class Activation Mapping methods used to improve CO2 leakage detection from carbon capture and sequestration?",
         "How can machine learning be used to predict vegetation health and mitigate the impacts of agricultural drought in Kenya?",
         "How can machine learning practitioners estimate the energy consumption of their models without training them?",
+        "How can machine learning aid in detecting CO2 leakage in carbon capture and sequestration (CCS) projects?",
     ]
 
     for query in queries:
