@@ -1,0 +1,136 @@
+import time
+
+import faiss
+import numpy as np
+import torch.utils.data as data
+from data_utils import get_datasets
+from sentence_transformers import SentenceTransformer
+from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+
+np.set_printoptions(precision=3, suppress=True)
+
+
+# This class will input param for using RAG or not
+class AnswerGenerator:
+    def __init__(self, lm_path, use_rag, rag_type=None):
+        self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
+        self.generator = AutoModelForSeq2SeqLM.from_pretrained(lm_path)
+
+        # Convert every chunk in our dataset into the encoded embeddings
+        self.max_length = 256
+        train_dataset, test_dataset, _ = get_datasets(
+            root_dir="climate_text_dataset",
+            preprocess=False,
+            model_name=lm_path,
+            max_length=self.max_length,
+        )
+        self.train_loader = data.DataLoader(
+            train_dataset,
+            batch_size=64,
+            num_workers=4,
+        )
+        self.test_loader = data.DataLoader(
+            test_dataset,
+            batch_size=64,
+            num_workers=4,
+        )
+        if use_rag:
+            self.use_rag = True
+            # self.set_encoder(encoder_path)
+            # self._set_doc_embeddings()
+            # self.set_index(rag_type)
+
+    def set_encoder(self, encoder_path):
+        self.encoder = SentenceTransformer(encoder_path)
+        self._set_doc_embeddings()
+
+    def set_index(self, rag_type):
+        if rag_type == "index_flat_l2":
+            self.index = faiss.IndexFlatL2(self.doc_embeddings.shape[1])
+            self.index.add(self.doc_embeddings)
+        elif rag_type == "index_hnsw":
+            self.index = faiss.IndexHNSWFlat(self.doc_embeddings.shape[1], 32)
+            self.index.add(self.doc_embeddings)
+        elif rag_type == "index_ivf":
+            N, d = self.doc_embeddings.shape
+            # nlist = int(np.sqrt(N))  # ~100
+            nlist = 15
+            quantizer = faiss.IndexFlatL2(d)
+            self.index = faiss.IndexIVFFlat(quantizer, d, nlist, faiss.METRIC_L2)
+            self.index.train(self.doc_embeddings)
+            self.index.add(self.doc_embeddings)
+            self.index.nprobe = 16
+        else:
+            raise ValueError(f"Invalid RAG type: {rag_type}")
+
+    def _set_doc_embeddings(self):
+        # Convert all documents from train loader into embeddings
+        doc_embeddings = []
+        doc_texts = []
+        for batch in self.train_loader:
+            # Encode each batch of documents
+            batch_embeddings = self.encoder.encode(batch["text"], convert_to_numpy=True)
+            doc_embeddings.append(batch_embeddings)
+            doc_texts.append(batch["text"])
+
+        # Concatenate all batch embeddings into single array
+        self.doc_embeddings = np.concatenate(doc_embeddings, axis=0)
+        self.doc_texts = np.concatenate(doc_texts, axis=0)
+
+        print(
+            f"Document embeddings shape: {self.doc_embeddings.shape} - doc texts: {self.doc_texts.shape}"
+        )
+
+    def generate_answer(self, query, top_k=1):
+        if self.use_rag:  # Add context to the prompt
+            # Retrieve docs
+            query_vec = self.encoder.encode([query])
+            distances, indices = self.index.search(np.array(query_vec), k=top_k)
+            retrieved_docs = [self.doc_texts[i] for i in indices[0]]
+
+            # Generate answer
+            context = " ".join(retrieved_docs)
+            prompt = f"Context: {context} Question: {query} Answer:"
+
+        else:
+            # Generate answer using only LM
+            prompt = f"Question: {query} Answer:"
+
+        inputs = self.tokenizer(
+            prompt, return_tensors="pt", max_length=self.max_length, truncation=True
+        )
+        outputs = self.generator.generate(**inputs, max_new_tokens=256)
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+
+if __name__ == "__main__":
+    gen = AnswerGenerator(
+        lm_path="google/flan-t5-base",
+        use_rag=True,
+    )
+
+    # Open log file in append mode
+    timestamp = time.strftime("%m%d-%H%M%S")
+    log_filename = f"log_{timestamp}.txt"
+
+    query = "How does CO2 affect the climate?"
+    # encoder_names = ["BAAI/bge-large-en", "all-MiniLM-L6-v2"]
+    encoder_names = ["all-MiniLM-L6-v2"]
+    # rag_types = ["index_flat_l2", "index_hnsw", "index_ivf"]
+    rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
+    for encoder_name in encoder_names:
+        gen.set_encoder(encoder_name)
+        for rag_type in rag_types:
+            gen.set_index(rag_type)
+            time_start = time.time()
+            answer = gen.generate_answer(query, top_k=10)
+            time_end = time.time()
+            print(answer)
+            print(f"RAG type: {rag_type} - Time taken: {time_end - time_start} seconds")
+
+            with open(log_filename, "a") as f:
+                f.write(f"\nEncoder: {encoder_name}\n")
+                f.write(f"RAG type: {rag_type}\n")
+                f.write(f"Time taken: {time_end - time_start} seconds\n")
+                f.write(f"Query: {query} - Answer: {answer}\n")
+                f.write("-" * 50 + "\n")
