@@ -2,6 +2,7 @@ import time
 
 import faiss
 import numpy as np
+import torch
 import torch.utils.data as data
 from data_utils import get_datasets
 from sentence_transformers import SentenceTransformer
@@ -13,10 +14,17 @@ np.set_printoptions(precision=3, suppress=True)
 # This class will input param for using RAG or not
 class AnswerGenerator:
     def __init__(self, lm_path):
-        self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
-        self.tokenizer.pad_token = self.tokenizer.eos_token
-        self.tokenizer.padding_side = "left"
-        self.generator = AutoModelForCausalLM.from_pretrained(lm_path)
+        self.tokenizer = AutoTokenizer.from_pretrained(lm_path, trust_remote_code=True)
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+            self.tokenizer.pad_token = "[PAD]"
+        self.generator = AutoModelForCausalLM.from_pretrained(
+            lm_path,
+            trust_remote_code=True,
+            device_map="auto",
+            torch_dtype=torch.float16,
+        )
+        self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
         self.max_length = 256
