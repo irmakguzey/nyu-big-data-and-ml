@@ -18,12 +18,17 @@ class AnswerGenerator:
         if self.tokenizer.pad_token is None:
             self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
             self.tokenizer.pad_token = "[PAD]"
+
+        # Initialize model with correct vocab size
         self.generator = AutoModelForCausalLM.from_pretrained(
             lm_path,
             trust_remote_code=True,
             device_map="auto",
             torch_dtype=torch.float16,
+            vocab_size=128257,  # Explicitly set the vocab size to match the checkpoint
         )
+
+        # Resize token embeddings to match the tokenizer
         self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
