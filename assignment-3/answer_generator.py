@@ -147,6 +147,7 @@ if __name__ == "__main__":
 
     for query in queries:
         for model_type in model_types:
+            print(f"Model type: {model_type} - Path: {llama_path_dict[model_type]}")
             gen = AnswerGenerator(
                 lm_path=llama_path_dict[model_type],
             )
