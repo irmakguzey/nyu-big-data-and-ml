@@ -14,6 +14,8 @@ np.set_printoptions(precision=3, suppress=True)
 class AnswerGenerator:
     def __init__(self, lm_path):
         self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
+        self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.tokenizer.padding_side = "left"
         self.generator = AutoModelForCausalLM.from_pretrained(lm_path)
 
         # Convert every chunk in our dataset into the encoded embeddings
