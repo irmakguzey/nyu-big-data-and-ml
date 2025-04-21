@@ -1,0 +1,291 @@
+Model type: finetuned
+Use RAG: False
+Time taken: 30.937 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Question: What is a method to measure CO2 leakage from carbon capture and sequestration? Answer: A tracer gas method is a method to measure CO2 leakage from carbon capture and sequestration. It involves the release of a small amount of a non-CO2 gas into the storage site, such as sulfur hexafluoride (SF6) or helium. The release of the tracer gas allows for the tracking of its movement through the storage site and any potential leakage into the atmosphere. By measuring the concentration of the tracer gas over time, the rate of CO2 leakage can be estimated. This method is useful for monitoring the effectiveness of carbon capture and sequestration technologies and identifying any areas where leakage may be occurring.
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: all-MiniLM-L6-v2
+RAG type: index_hnsw
+Time taken: 65.672 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: ACTIVITY -BASED RECOMMENDATIONS FOR THE RE-
+DUCTION OF CO2 E MISSIONS IN PRIVATE HOUSE -
+HOLDS
+Alona Zharova∗
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+alona.zharova@hu-berlin.deLaura L ¨oschmann
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+laur Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat Quantiﬁcation of Carbon Sequestration in Urban Forests
+Levelling (CCS) is a promising tech- Using Machine Learning
+nology for reducing CO 2 emissions. How- Background
+ever, the site selection for CCS is a com- Carbon capture and storage (CCS) is a
+plex problem as it requires a thorough tech- promising technology to mitigate climate
+nical evaluation of the site and its environ- change. CCS involves capturing CO 2 emis-
+ment. Currently, CCS is mainly based on sions from industrial sources, transporting
+manual site assessment and ﬁeld veriﬁca- them to underground storage sites, and
+tion. This process is time-consuming and sequestering the CO 2 there. CCS can be
+costly. The purpose of this paper is to de- implemented in three main forms: pre-com-
+velop a framework to automate the site se- bined capture and storage (CCS), post-
+lection process. We propose a machine learning based approach for automating the site
+selection process. Our approach consists of two main steps: 1) quantifying the amount of
+carbon stored in urban forests using satellite imagery and 2) classifying urban forests
+into sites suitable for CCS. We demonstrate the feasibility of our approach by quantifying
+
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: all-MiniLM-L6-v2
+RAG type: index_ivf
+Time taken: 65.070 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: ACTIVITY -BASED RECOMMENDATIONS FOR THE RE-
+DUCTION OF CO2 E MISSIONS IN PRIVATE HOUSE -
+HOLDS
+Alona Zharova∗
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+alona.zharova@hu-berlin.deLaura L ¨oschmann
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+laur Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat Quantiﬁcation of Carbon Sequestration in Urban Forests
+Le (CCS) is one of the most promising technologies for mitigating the climate change. It
+provides a cost-effective solution to reduce the CO 2emissions from the industrial and
+power plants. However, the deployment of CCS is limited due to the high cost of the
+technology and the lack of suitable storage sites. The urban forests can be a potential
+site for the storage of CO 2emissions, as they have the potential to sequester a large
+amount of carbon. In this paper, we present a novel approach to quantify the carbon
+sequestration potential of urban forests using machine learning techniques. We propose
+a framework that combines remote sensing data with machine learning algorithms to
+estimate the carbon sequestration potential of urban forests. The framework consists
+of three main components: (1) data collection and pre-processing, (2) feature extrac-
+tion and feature selection, and (3) machine learning model development. The data
+collection and pre-processing component involves collecting data from multiple sources
+including remote sensing data, ground-truth data, and other relevant data. The feature
+extraction and feature selection component involves extracting relevant features from the
+data and selecting the most relevant features for the machine learning model. The machine
+
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: all-MiniLM-L6-v2
+RAG type: index_flat_l2
+Time taken: 64.612 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: ACTIVITY -BASED RECOMMENDATIONS FOR THE RE-
+DUCTION OF CO2 E MISSIONS IN PRIVATE HOUSE -
+HOLDS
+Alona Zharova∗
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+alona.zharova@hu-berlin.deLaura L ¨oschmann
+Humboldt-Universit ¨at zu Berlin
+Berlin, Germany
+laur Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat Quantiﬁcation of Carbon Sequestration in Urban Forests
+Lei Zhang, Wenrui Li, Yiqin Liu, Yufei Zhang, Xiangyu Liu, Xingwei Chen, Hui Li, Yifan
+Zhao, Xin Huang, Xiaoming Chen, Xiang Li, Xiaoping Liu, Xue Wang, Shuai Zhang
+Shell International E&P Inc.
+Carbon Capture and Storage (CCS) is one of the mainstays of the energy indus-
+try’s pathway to net zero emissions. However, the cost of CCS has been a major
+challenge. Carbon sequestration is a promising alternative to CCS, which can se-
+quester carbon dioxide in the ground, thereby reducing the cost of CCS. In this
+paper, we present a novel method for quantifying carbon sequestration in urban for-
+ests using machine learning. The method involves ﬁrst classifying trees into diﬀer-
+ent species, and then calculating the amount of carbon stored in each species. We
+then use the carbon storage data to estimate the total amount of carbon sequestered
+in the forest. Our method is highly accurate and can be used to evaluate the ef-
+fectiveness of carbon sequestration strategies in urban areas.
+1 Introduction
+Carbon capture and sequestration (
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: BAAI/bge-large-en
+RAG type: index_hnsw
+Time taken: 64.796 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Improving Power Plant CO 2Emission Estimation with
+Deep Learning and Satellite/Simulated Data
+Dibyabha Deb
+Manipal Institute of Technology, India
+dibyabha.deb@learner.manipal.eduKamal Das
+IBM Research, India
+kdas3@in.ibm.com
+Abstract
+CO2emissions from powe Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat ATLAS: A spend classification benchmark for
+estimating scope 3 carbon emissions
+Andrew Dumit∗
+Watershed Technology Inc.Krishna Ganti∗
+Watershed Technology Inc.
+Abstract
+Carbon Capture and Storage (CCS) is an important technology for mitigating climate
+change by reducing CO2emissions. However, its deployment is currently hindered
+by the lack of accurate and reliable data to assess the potential of carbon sequestration
+sites. In this paper, we present an approach to automate the assessment of carbon
+sequestration sites using satellite and simulated data. We propose a novel framework
+that combines machine learning with satellite data to classify the potential of a site for
+carbon sequestration. Our approach leverages the power of deep learning and simu-
+lated data to provide a cost-effective and efficient solution for carbon sequestration site
+assessment. We demonstrate the effectiveness of our approach on a dataset of 1,000
+carbon sequestration sites in the United States. Our results show that our model can
+achieve an accuracy of 91.3% in classifying the potential of carbon sequestration sites,
+outperforming the state-of-the-art method. This approach has the potential to revolutionize
+the carbon sequestration industry by providing accurate and reliable data to assess the
+potential of carbon sequestration sites, leading to more informed decision
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: BAAI/bge-large-en
+RAG type: index_ivf
+Time taken: 64.702 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Improving Power Plant CO 2Emission Estimation with
+Deep Learning and Satellite/Simulated Data
+Dibyabha Deb
+Manipal Institute of Technology, India
+dibyabha.deb@learner.manipal.eduKamal Das
+IBM Research, India
+kdas3@in.ibm.com
+Abstract
+CO2emissions from powe Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat ATLAS: A spend classification benchmark for
+estimating scope 3 carbon emissions
+Andrew Dumit∗
+Watershed Technology Inc.Krishna Chintaluri
+Watershed Technology Inc.Richard Fung
+Watershed Technology Inc.
+Abstract
+Machine Learning has become an impor 1
+tant tool in the fight against climate change. The
+potential to automate the assessment of carbon
+sequestration sites, which are crucial for the
+successful implementation of carbon capture and
+sequestration (CCS) technologies, is immense.
+However, the current manual process is time-
+consuming and prone to human error. In this
+paper, we introduce ATLAS, a spend classifi-
+cation benchmark for estimating scope 3 carbon
+emissions. ATLAS is designed to automatically
+classify and quantify the spend associated with
+various CCS technologies, enabling more accurate
+estimates of carbon sequestration potential. Our
+approach leverages advanced machine learning
+techniques to analyze detailed project information,
+including financial and technical data. By provid-
+ing a standardized and automated process, ATLAS
+can significantly improve the efficiency and accu-
+racy of CCS site assessments, ultimately driving
+the widespread adoption of CCS technologies and
+contributing to a more sustainable future.
+1 Introduction
+Carbon capture and sequestration (CCS) technologies hold the promise of reducing greenhouse gas emissions and
+--------------------------------------------------
+Model type: finetuned
+Use RAG: True
+Encoder: BAAI/bge-large-en
+RAG type: index_flat_l2
+Time taken: 64.820 seconds
+Query: What is a method to measure CO2 leakage from carbon capture and sequestration? - Answer: Context: Inference of CO 2flow patterns–a feasibility study
+Abhinav Prakash Gahlot
+Georgia Institute of Technology
+agahlot8@gatech.eduHuseyin Tuna Erdinc
+Georgia Institute of Technology
+herdinc3@gatech.eduRafael Orozco
+Georgia Institute of Technology
+rorozco@gatech Improving Power Plant CO 2Emission Estimation with
+Deep Learning and Satellite/Simulated Data
+Dibyabha Deb
+Manipal Institute of Technology, India
+dibyabha.deb@learner.manipal.eduKamal Das
+IBM Research, India
+kdas3@in.ibm.com
+Abstract
+CO2emissions from powe Machine Learning in Automating Carbon
+Sequestration Site Assessment
+Jay Chen, Ligang Lu, Mohamed Sidahmed, Taixu Bai, Ilyana Folmar, Puneet Seth,
+Manoj Sarfare, Duane Mikulencak, Ihab Akil
+Shell International E&P Inc.
+Abstract
+Carbon capture and sequestrat ATLAS: A spend classification benchmark for
+estimating scope 3 carbon emissions
+Andrew Dumit∗
+Watershed Technology Inc.Krishna M. Ganesan
+Stanford University
+Abstract
+Carbon emissions from the fossil fuel in-dustry are a major contributor to global
+warming. The oil and gas industry is the largest contributor to carbon emissions
+from the fossil fuel industry, accounting for approximately 30% of global carbon
+emissions. Scope 3 emissions, which represent the emissions from the upstream
+and downstream supply chain, are a significant source of uncertainty in carbon
+emission estimates. The oil and gas industry has the opportunity to improve its
+carbon emissions estimates by leveraging machine learning techniques on existing
+data sources. This paper presents an overview of the oil and gas industry, its
+scope 3 emissions, and the potential for machine learning to improve carbon
+emission estimates. The paper also introduces the ATLAS dataset, a benchmark
+for carbon emission estimation for the oil and gas industry, and provides a
+discussion on the challenges and potential solutions for improving carbon emission
+estimates.
+1 Introduction
+The oil and gas industry is a major contributor to global carbon emissions, accounting for approximately 30% of global carbon emissions [1]. The upstream and downstream activities of the oil and gas industry are responsible for emissions from the production, transportation, and refining of fossil fuels. These emissions contribute
+--------------------------------------------------
