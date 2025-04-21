@@ -36,7 +36,7 @@ class AnswerGenerator:
             self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
-        self.max_length = 128
+        self.max_length = 32
         train_dataset, test_dataset, _ = get_datasets(
             root_dir="climate_text_dataset",
             preprocess=False,
