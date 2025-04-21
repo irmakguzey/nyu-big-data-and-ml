@@ -5,7 +5,7 @@ import numpy as np
 import torch.utils.data as data
 from data_utils import get_datasets
 from sentence_transformers import SentenceTransformer
-from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 np.set_printoptions(precision=3, suppress=True)
 
@@ -14,7 +14,7 @@ np.set_printoptions(precision=3, suppress=True)
 class AnswerGenerator:
     def __init__(self, lm_path):
         self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
-        self.generator = AutoModelForSeq2SeqLM.from_pretrained(lm_path)
+        self.generator = AutoModelForCausalLM.from_pretrained(lm_path)
 
         # Convert every chunk in our dataset into the encoded embeddings
         self.max_length = 256
