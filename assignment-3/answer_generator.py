@@ -5,6 +5,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 from data_utils import get_datasets
+from peft.peft_model import PeftModel
 from sentence_transformers import SentenceTransformer
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
@@ -13,22 +14,27 @@ np.set_printoptions(precision=3, suppress=True)
 
 # This class will input param for using RAG or not
 class AnswerGenerator:
-    def __init__(self, lm_path):
-        self.tokenizer = AutoTokenizer.from_pretrained(lm_path, trust_remote_code=True)
-        # if self.tokenizer.pad_token is None:
-        #     self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-        #     self.tokenizer.pad_token = "[PAD]"
+    def __init__(self, lm_path, model_type="finetuned"):
+        self.tokenizer = AutoTokenizer.from_pretrained("./Llama3.2-3B")
+        if self.tokenizer.pad_token is None:
+            self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+            self.tokenizer.pad_token = "[PAD]"
 
         # Initialize model with correct vocab size
-        self.generator = AutoModelForCausalLM.from_pretrained(
-            lm_path,
-            trust_remote_code=True,
-            device_map="auto",
-            torch_dtype=torch.float16,
-        )
+        if model_type == "finetuned":
+            model = AutoModelForCausalLM.from_pretrained("./Llama3.2-3B")
+            model.resize_token_embeddings(len(self.tokenizer))
+            self.generator = PeftModel.from_pretrained(model, lm_path)
+        else:
+            self.generator = AutoModelForCausalLM.from_pretrained(
+                lm_path,
+                # trust_remote_code=True,
+                device_map="auto",
+                # torch_dtype=torch.float16,
+            )
 
-        # Resize token embeddings to match the tokenizer
-        self.generator.resize_token_embeddings(len(self.tokenizer))
+            # Resize token embeddings to match the tokenizer
+            self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
         self.max_length = 256
