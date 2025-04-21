@@ -134,9 +134,7 @@ class AnswerGenerator:
 
 if __name__ == "__main__":
     finetuned_llama_path = "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/results-llamba-03-11_18:16:23/checkpoint-200"
-    pretrained_llama_path = (
-        "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/Llama3.2-3B"
-    )
+    pretrained_llama_path = "./Llama3.2-3B"
 
     # llama_path_dict = {
     #     "finetuned": "google/flan-t5-base",
@@ -170,6 +168,7 @@ if __name__ == "__main__":
             print(f"Model type: {model_type} - Path: {llama_path_dict[model_type]}")
             gen = AnswerGenerator(
                 lm_path=llama_path_dict[model_type],
+                model_type=model_type,
             )
             for use_rag in use_rags:
                 gen.set_use_rag(use_rag)
