@@ -16,6 +16,7 @@ np.set_printoptions(precision=3, suppress=True)
 class AnswerGenerator:
     def __init__(self, lm_path, model_type="finetuned"):
         self.tokenizer = AutoTokenizer.from_pretrained("./Llama3.2-3B")
+        # self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
         if self.tokenizer.pad_token is None:
             self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
             self.tokenizer.pad_token = "[PAD]"
@@ -28,16 +29,14 @@ class AnswerGenerator:
         else:
             self.generator = AutoModelForCausalLM.from_pretrained(
                 lm_path,
-                # trust_remote_code=True,
                 device_map="auto",
-                # torch_dtype=torch.float16,
             )
 
             # Resize token embeddings to match the tokenizer
             self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
-        self.max_length = 16
+        self.max_length = 128
         train_dataset, test_dataset, _ = get_datasets(
             root_dir="climate_text_dataset",
             preprocess=False,
@@ -137,8 +136,8 @@ if __name__ == "__main__":
     pretrained_llama_path = "./Llama3.2-3B"
 
     # llama_path_dict = {
-    #     "finetuned": "google/flan-t5-base",
-    #     "pretrained": "google/flan-t5-base",
+    #     "finetuned": "gpt2",
+    #     "pretrained": "gpt2",
     # }
     llama_path_dict = {
         "finetuned": finetuned_llama_path,
