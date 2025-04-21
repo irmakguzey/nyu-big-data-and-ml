@@ -37,7 +37,7 @@ class AnswerGenerator:
             self.generator.resize_token_embeddings(len(self.tokenizer))
 
         # Convert every chunk in our dataset into the encoded embeddings
-        self.max_length = 256
+        self.max_length = 16
         train_dataset, test_dataset, _ = get_datasets(
             root_dir="climate_text_dataset",
             preprocess=False,
@@ -126,9 +126,9 @@ class AnswerGenerator:
             prompt = f"Question: {query} Answer:"
 
         inputs = self.tokenizer(
-            prompt, return_tensors="pt", max_length=self.max_length, truncation=True
+            prompt, return_tensors="pt", max_length=256, truncation=True
         )
-        outputs = self.generator.generate(**inputs, max_new_tokens=256)
+        outputs = self.generator.generate(**inputs, max_new_tokens=512)
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
 
 
@@ -145,7 +145,7 @@ if __name__ == "__main__":
         "pretrained": pretrained_llama_path,
     }
 
-    model_types = ["pretrained"]
+    model_types = ["pretrained", "finetuned"]
     use_rags = [False, True]
     encoder_names = ["all-MiniLM-L6-v2", "BAAI/bge-large-en"]
     rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
@@ -179,7 +179,7 @@ if __name__ == "__main__":
                             gen.set_index(rag_type)
 
                             time_start = time.time()
-                            answer = gen.generate_answer(query, top_k=10)
+                            answer = gen.generate_answer(query, top_k=5)
                             time_end = time.time()
                             time_spent = time_end - time_start
                             print(answer)
