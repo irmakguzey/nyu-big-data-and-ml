@@ -147,7 +147,7 @@ if __name__ == "__main__":
         "pretrained": pretrained_llama_path,
     }
 
-    model_types = ["finetuned", "pretrained"]
+    model_types = ["pretrained"]
     use_rags = [False, True]
     encoder_names = ["all-MiniLM-L6-v2", "BAAI/bge-large-en"]
     rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]
