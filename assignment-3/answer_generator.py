@@ -15,9 +15,9 @@ np.set_printoptions(precision=3, suppress=True)
 class AnswerGenerator:
     def __init__(self, lm_path):
         self.tokenizer = AutoTokenizer.from_pretrained(lm_path, trust_remote_code=True)
-        if self.tokenizer.pad_token is None:
-            self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-            self.tokenizer.pad_token = "[PAD]"
+        # if self.tokenizer.pad_token is None:
+        #     self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
+        #     self.tokenizer.pad_token = "[PAD]"
 
         # Initialize model with correct vocab size
         self.generator = AutoModelForCausalLM.from_pretrained(
@@ -25,7 +25,6 @@ class AnswerGenerator:
             trust_remote_code=True,
             device_map="auto",
             torch_dtype=torch.float16,
-            vocab_size=128257,  # Explicitly set the vocab size to match the checkpoint
         )
 
         # Resize token embeddings to match the tokenizer
