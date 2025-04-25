@@ -4,3 +4,6 @@
 [submodule "assignment-2/submodules/nanotron"]
 	path = assignment-2/submodules/nanotron
 	url = https://github.com/irmakguzey/nanotron
+[submodule "project/submodules/vrb"]
+	path = project/submodules/vrb
+	url = https://github.com/shikharbahl/vrb.git
