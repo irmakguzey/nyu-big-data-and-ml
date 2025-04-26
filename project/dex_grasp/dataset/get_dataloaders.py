@@ -9,8 +9,8 @@ def get_dataloaders(
     pkl_dirs = [
         "/data_ssd/irmak/deft-data-all/ego4d-r3m/labels_obj_bbox",
         "/data_ssd/irmak/deft-data-all/ego4d-sta/labels_obj_bbox",
-        # "/data_ssd/irmak/deft-data-all/ek100/labels_obj_bbox",
-        # "/data_ssd/irmak/deft-data-all/hoi4d/labels",
+        "/data_ssd/irmak/deft-data-all/ek100/labels_obj_bbox",
+        "/data_ssd/irmak/deft-data-all/hoi4d/labels",
     ]  # TODO: Fix this!!
 
     dsets = []
@@ -45,6 +45,6 @@ def get_dataloaders(
 
 
 if __name__ == "__main__":
-    dataloader = get_dataloader()
+    dataloader = get_dataloaders()
     for batch in dataloader:
         print(batch)

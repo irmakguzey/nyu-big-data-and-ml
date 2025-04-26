@@ -5,11 +5,24 @@ import pickle
 
 import numpy as np
 import torch
+import torchvision.transforms.functional as F
 from PIL import Image
 from scipy.spatial.transform import Rotation as R
 from torch.utils.data import DataLoader, Dataset
 from torchvision import transforms
 from transformers import AutoImageProcessor
+
+
+def center_crop_square(image):
+    if isinstance(image, torch.Tensor):
+        _, h, w = image.shape  # (C, H, W)
+    elif isinstance(image, np.ndarray):
+        h, w = image.shape[:2]
+    else:
+        w, h = image.size  # PIL Image: (W, H)
+
+    crop_size = min(h, w)
+    return F.center_crop(image, output_size=[crop_size, crop_size])
 
 
 class GraspDataset(Dataset):
@@ -19,11 +32,12 @@ class GraspDataset(Dataset):
 
         # Initialize the processor with a specific model
         # NOTE: We will be using Dinov2-base as our image processor / and encoder
-        self.processor = AutoImageProcessor.from_pretrained("facebook/dinov2-base")
+        # self.processor = AutoImageProcessor.from_pretrained("facebook/dinov2-base")
         self.transform = (
             transforms.Compose(  # NOTE: This is basically used for debugging!
                 [
                     transforms.ToTensor(),
+                    transforms.Lambda(center_crop_square),
                     transforms.Resize((224, 224)),
                 ]
             )
@@ -75,8 +89,6 @@ class GraspDataset(Dataset):
             hand_pose = data["contact_grasp"][0]["right_hand"]["pred_hand_pose"]
         elif "left_hand" in data["contact_grasp"][0]:
             hand_pose = data["contact_grasp"][0]["left_hand"]["pred_hand_pose"]
-        else:
-            raise ValueError("No hand pose found in the pkl file")
 
         if len(hand_pose.shape) == 1:
             hand_pose = np.expand_dims(hand_pose, axis=0)
@@ -84,10 +96,6 @@ class GraspDataset(Dataset):
         org_image = data["img"]
         bbox = data["contact_object_det"]["bbox"]
         cropped_image = self._crop_image(org_image, bbox)
-
-        # Image.fromarray(cropped_image).save(
-        #     f"debug_image_{data['contact_object_det']['label']}_{data['narration']}.png"
-        # )
 
         # Get contact points
         contact_points = torch.FloatTensor(data["contact"])[:5]
@@ -98,35 +106,19 @@ class GraspDataset(Dataset):
                 contact_points = torch.cat([contact_points, last_point], dim=0)
 
         # NOTE: Not sure if i want to return the original image as well
-        pkl_data = dict(
-            # processed_image=self.processor(
-            #     torch.tensor(cropped_image), return_tensors="pt"
-            # ).pixel_values[0],
-            image=(
-                self.transform(cropped_image)
-                if self.return_cropped_image
-                else cropped_image
-            ),
-            # image_pil=Image.fromarray(cropped_image),
-            contact_points=contact_points,
-            grasp_rotation=torch.FloatTensor(R.from_matrix(data["H"]).as_rotvec()),
-            task_description=data["narration"],
-            # obj_description=data["contact_object_det"]["label"],
-            hand_pose=torch.FloatTensor(hand_pose)[0],
-        )
-
-        # for k, v in pkl_data.items():
-        #     if k != "task_description":
-        #         print(f"{k}: {v.shape}")
+        image = self.transform(cropped_image).clamp(
+            0, 1
+        )  # Should clamp it to input to clip preprocessor
+        grasp_rotation = torch.FloatTensor(R.from_matrix(data["H"]).as_rotvec())
+        task_description = data["narration"]
+        hand_pose = torch.FloatTensor(hand_pose)[0]
 
         return (
-            pkl_data["image"],
-            # pkl_data["processed_image"],
-            pkl_data["contact_points"],
-            pkl_data["grasp_rotation"],
-            pkl_data["hand_pose"],
-            pkl_data["task_description"],
-            # pkl_data["obj_description"],
+            image,
+            contact_points,
+            grasp_rotation,
+            hand_pose,
+            task_description,
         )
 
     def __getitem__(self, idx):

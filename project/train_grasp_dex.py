@@ -14,7 +14,7 @@ from tqdm import tqdm
 @dataclass
 class TrainingConfig:
     num_epochs: int = 500
-    batch_size: int = 128
+    batch_size: int = 512
     num_workers: int = 32
     train_dset_split: float = 0.8
     lambda_m: float = 1e-5
@@ -212,6 +212,6 @@ class Trainer:
 
 
 if __name__ == "__main__":
-    cfg = TrainingConfig(device=1, log=True, save_model=True)
+    cfg = TrainingConfig(device=2, log=True, save_model=True)
     trainer = Trainer(cfg)
     trainer.train()
