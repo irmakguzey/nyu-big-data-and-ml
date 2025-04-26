@@ -15,8 +15,8 @@ np.set_printoptions(precision=3, suppress=True)
 # This class will input param for using RAG or not
 class AnswerGenerator:
     def __init__(self, lm_path, model_type="finetuned"):
-        self.tokenizer = AutoTokenizer.from_pretrained("./Llama3.2-3B")
-        # self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
+        # self.tokenizer = AutoTokenizer.from_pretrained("./Llama3.2-3B")
+        self.tokenizer = AutoTokenizer.from_pretrained(lm_path)
         if self.tokenizer.pad_token is None:
             self.tokenizer.add_special_tokens({"pad_token": "[PAD]"})
             self.tokenizer.pad_token = "[PAD]"
@@ -135,16 +135,16 @@ if __name__ == "__main__":
     finetuned_llama_path = "/scratch/ig2283/Workspace/nyu-big-data-and-ml/assignment-1/results-llamba-03-11_18:16:23/checkpoint-200"
     pretrained_llama_path = "./Llama3.2-3B"
 
-    # llama_path_dict = {
-    #     "finetuned": "gpt2",
-    #     "pretrained": "gpt2",
-    # }
     llama_path_dict = {
-        "finetuned": finetuned_llama_path,
-        "pretrained": pretrained_llama_path,
+        "finetuned": "gpt2",
+        "pretrained": "gpt2",
     }
+    # llama_path_dict = {
+    #     "finetuned": finetuned_llama_path,
+    #     "pretrained": pretrained_llama_path,
+    # }
 
-    model_types = ["pretrained", "finetuned"]
+    model_types = ["pretrained"]
     use_rags = [False, True]
     encoder_names = ["all-MiniLM-L6-v2", "BAAI/bge-large-en"]
     rag_types = ["index_hnsw", "index_ivf", "index_flat_l2"]

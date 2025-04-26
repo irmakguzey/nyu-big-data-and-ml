@@ -17,3 +17,6 @@ assignment-2/__pycache__/*
 assignment-2/tb_logs/*
 assignment-2/wandb/*
 *.txt
+
+project/wandb/*
+project/checkpoints/*
