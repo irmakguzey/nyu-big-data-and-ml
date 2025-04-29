@@ -13,16 +13,16 @@ from tqdm import tqdm
 
 @dataclass
 class TrainingConfig:
-    num_epochs: int = 500
+    num_epochs: int = 1000
     batch_size: int = 512
     num_workers: int = 32
     train_dset_split: float = 0.8
-    lambda_m: float = 1e-5
-    lambda_g: float = 5
-    lambda_r: float = 0.1
+    lambda_m: float = 5e-5
+    lambda_g: float = 15
+    lambda_r: float = 0.5
     hidden_dim: int = 512
     crop_image: bool = False
-    test_every_n_epochs: int = 10
+    test_every_n_epochs: int = 50
     device: int = 1
     log: bool = True
     save_model: bool = True
@@ -52,6 +52,7 @@ class Trainer:
             list(self.affordance_model.parameters())
             + list(self.grasp_transformer.parameters()),
             lr=1e-4,
+            weight_decay=1e-5,
         )
 
     def _init_dataloaders(self):

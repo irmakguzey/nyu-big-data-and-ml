@@ -7,3 +7,6 @@
 [submodule "project/submodules/vrb"]
 	path = project/submodules/vrb
 	url = https://github.com/shikharbahl/vrb.git
+[submodule "project/submodules/manotorch"]
+	path = project/submodules/manotorch
+	url = https://github.com/lixiny/manotorch.git

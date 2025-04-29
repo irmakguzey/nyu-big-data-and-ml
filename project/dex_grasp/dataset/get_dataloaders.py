@@ -11,7 +11,7 @@ def get_dataloaders(
         "/data_ssd/irmak/deft-data-all/ego4d-sta/labels_obj_bbox",
         "/data_ssd/irmak/deft-data-all/ek100/labels_obj_bbox",
         "/data_ssd/irmak/deft-data-all/hoi4d/labels",
-    ]  # TODO: Fix this!!
+    ]
 
     dsets = []
     for pkl_dir in pkl_dirs:
@@ -19,6 +19,7 @@ def get_dataloaders(
             GraspDataset(
                 pkl_dir=pkl_dir,
                 return_cropped_image=crop_image,
+                transform_contact=True,
             )
         )
 

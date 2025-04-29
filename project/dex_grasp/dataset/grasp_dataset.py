@@ -26,9 +26,10 @@ def center_crop_square(image):
 
 
 class GraspDataset(Dataset):
-    def __init__(self, pkl_dir, return_cropped_image=False):
+    def __init__(self, pkl_dir, return_cropped_image=False, transform_contact=False):
         self.pkl_files = glob.glob(os.path.join(pkl_dir, "*.pkl"))
         self.return_cropped_image = return_cropped_image
+        self.transform_contact = transform_contact
 
         # Initialize the processor with a specific model
         # NOTE: We will be using Dinov2-base as our image processor / and encoder
@@ -42,6 +43,42 @@ class GraspDataset(Dataset):
                 ]
             )
         )
+
+    def _transform_contact_point(self, contact_point, img):
+        if isinstance(img, torch.Tensor):
+            _, h, w = img.shape  # (C, H, W)
+        elif isinstance(img, np.ndarray):
+            h, w = img.shape[:2]
+
+        crop_size = min(h, w)
+        resize_size = (224, 224)
+
+        """
+        contact_point: (batch_size, 2) torch tensor
+        Returns transformed points: (batch_size, 2) torch tensor
+        """
+        orig_h, orig_w = h, w
+        crop_h, crop_w = crop_size, crop_size
+        resize_h, resize_w = resize_size
+
+        crop_x_start = (orig_w - crop_w) / 2
+        crop_y_start = (orig_h - crop_h) / 2
+
+        scale_x = resize_w / crop_w
+        scale_y = resize_h / crop_h
+
+        y = contact_point[:, 1]
+        x = contact_point[:, 0]
+
+        x_cropped = x - crop_x_start
+        y_cropped = y - crop_y_start
+
+        x_resized = x_cropped * scale_x
+        y_resized = y_cropped * scale_y
+
+        transformed_points = torch.stack([x_resized, y_resized], dim=-1)
+
+        return transformed_points
 
     def _crop_image(self, org_image, bbox):
         if self.return_cropped_image:
@@ -105,6 +142,11 @@ class GraspDataset(Dataset):
             while len(contact_points) < 5:
                 contact_points = torch.cat([contact_points, last_point], dim=0)
 
+        if self.transform_contact:
+            contact_points = self._transform_contact_point(
+                contact_points, cropped_image
+            )
+
         # NOTE: Not sure if i want to return the original image as well
         image = self.transform(cropped_image).clamp(
             0, 1
@@ -116,8 +158,8 @@ class GraspDataset(Dataset):
         return (
             image,
             contact_points,
-            grasp_rotation,
-            hand_pose,
+            hand_pose[:3],
+            hand_pose[3:],
             task_description,
         )
 

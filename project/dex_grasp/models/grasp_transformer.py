@@ -14,7 +14,7 @@ class GraspTransformer(nn.Module):
         self.transformer = nn.TransformerEncoder(encoder_layer, num_layers=4)
 
         self.head_3d = nn.Linear(hidden_dim, 3)
-        self.head_48d = nn.Linear(hidden_dim, 48)
+        self.head_45d = nn.Linear(hidden_dim, 45)
 
     def forward(self, text_emb, image_emb):
         text = self.text_proj(text_emb)
@@ -22,5 +22,5 @@ class GraspTransformer(nn.Module):
         x = torch.stack([text, image], dim=1)  # [B, 2, hidden_dim]
         x = self.transformer(x)
         out_3d = self.head_3d(x[:, 0, :])
-        out_48d = self.head_48d(x[:, 1, :])
-        return out_3d, out_48d
+        out_45d = self.head_45d(x[:, 1, :])
+        return out_3d, out_45d
