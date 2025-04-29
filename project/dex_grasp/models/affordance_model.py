@@ -11,6 +11,7 @@ from einops import rearrange
 from torch import nn
 from torch.nn import functional as F
 from torch.nn.modules.transformer import MultiheadAttention
+from torchvision.models import resnet18
 from transformers import CLIPModel, CLIPProcessor
 
 
@@ -216,6 +217,7 @@ class AffordanceModel(nn.Module):
     def __init__(
         self,
         src_in_features,
+        use_clip=True,
         num_patches=1,
         embed_dim=512,
         coord_dim=64,
@@ -265,9 +267,12 @@ class AffordanceModel(nn.Module):
 
         self.var = var
 
-        self.model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(
+        self.clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to(
             self.device
         )
+        self.use_clip = use_clip
+        r3m = resnet18()
+        self.resnet = ImageEncoder(r3m)
         self.processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
         self.deconv1 = nn.ConvTranspose2d(512, 256, 2, stride=2)
@@ -279,8 +284,10 @@ class AffordanceModel(nn.Module):
         self.bn2 = nn.BatchNorm2d(128).to(self.device)
         self.bn3 = nn.BatchNorm2d(64).to(self.device)
 
-        if freeze_rep:
-            for param in self.model.parameters():
+        for param in self.clip_model.parameters():  # NOTE: Clip model is never trained
+            param.requires_grad = False
+        if not freeze_rep:
+            for param in self.resnet.parameters():
                 param.requires_grad = False
 
         self.var_MLP = nn.Sequential(
@@ -326,13 +333,12 @@ class AffordanceModel(nn.Module):
             do_rescale=False,
         )
         clip_inputs = clip_inputs.to(self.device)
-        outputs = self.model(**clip_inputs)
+        outputs = self.clip_model(**clip_inputs)
         img_feat = outputs.image_embeds
         text_feat = outputs.text_embeds
         return img_feat, text_feat
 
-    def get_mu_cvar(self, img_feat):
-
+    def get_mu_cvar_clip(self, img_feat):
         h = img_feat.reshape(img_feat.shape[0], 512, 1, 1)  # Reshape to (B, 512, 1, 1)
         # Deconvolution path
         h = self.deconv1(h)
@@ -377,3 +383,66 @@ class AffordanceModel(nn.Module):
         mu = torch.stack([cy, cx], dim=2)
 
         return mu, cvar
+
+    def get_resnet_features(self, img):
+        preprocess = nn.Sequential(nn.Identity(), self.resnet.normlayer)
+        obs = img.float()
+        obs_p = preprocess(obs)
+        h = self.resnet.convnet(obs_p)
+        return h
+
+    def get_mu_cvar_resnet(self, img):
+        preprocess = nn.Sequential(nn.Identity(), self.resnet.normlayer)
+        img = img.float()
+        img = preprocess(img)
+
+        cvar = 0
+        x = self.resnet.convnet.conv1(img)
+        x = self.resnet.convnet.bn1(x)
+        x = self.resnet.convnet.relu(x)
+        x = self.resnet.convnet.maxpool(x)
+        conv1 = self.resnet.convnet.layer1(x)
+        conv2 = self.resnet.convnet.layer2(conv1)
+        conv3 = self.resnet.convnet.layer3(conv2)
+        conv4 = self.resnet.convnet.layer4(conv3)
+        h = self.deconv1(conv4)
+        h = self.bn1(h)
+        h = self.resnet.convnet.layer1[0].relu(h)
+        h = self.deconv2(h + conv3)
+        h = self.bn2(h)
+        h = self.resnet.convnet.layer1[0].relu(h)
+        h = self.deconv3(h + conv2)
+        h = self.bn3(h)
+        h = self.resnet.convnet.layer1[0].relu(h)
+        x = self.cb2(self.cb1(h))
+        n = x.shape[2]
+        if self.attn_kp:
+            B, C, H, W = x.shape
+            h_flattened = self.flatten(x).transpose(1, 2)  # (B, H*W, C)
+            # Add positional encoding
+            h_flattened = h_flattened + self.pos_encoding.transpose(0, 1)[
+                :, : H * W
+            ].to(h.device)
+            attn_output, _ = self.self_attention(
+                h_flattened, h_flattened, h_flattened
+            )  # (B, H*W, C)
+            attn_output = attn_output.transpose(1, 2).view(B, C, H, W)  # (B, C, H, W)
+        if self.attn_kp and self.attn_kp_fc:
+            mu = self.fc_mu(
+                F.adaptive_avg_pool2d(attn_output, (1, 1)).view(-1, C)
+            ).view(
+                B, self.n_maps, 2
+            )  # (B, n_maps, 2)
+            return mu, cvar
+        elif self.attn_kp:
+            x = self.cb3(attn_output)
+        cy, _ = get_coord(x, 3, n)
+        cx, _ = get_coord(x, 2, n)
+        mu = torch.stack([cy, cx], dim=2)
+        return mu, cvar
+
+    def get_mu_cvar(self, img_feat=None, img=None):
+        if self.use_clip:
+            return self.get_mu_cvar_clip(img_feat)
+        else:
+            return self.get_mu_cvar_resnet(img)

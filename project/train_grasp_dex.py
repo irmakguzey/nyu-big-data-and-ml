@@ -14,18 +14,20 @@ from tqdm import tqdm
 @dataclass
 class TrainingConfig:
     num_epochs: int = 1000
-    batch_size: int = 512
+    batch_size: int = 128
     num_workers: int = 32
     train_dset_split: float = 0.8
-    lambda_m: float = 5e-5
+    lambda_m: float = 5e-4
     lambda_g: float = 15
-    lambda_r: float = 0.5
+    lambda_r: float = 2
     hidden_dim: int = 512
     crop_image: bool = False
     test_every_n_epochs: int = 50
     device: int = 1
     log: bool = True
     save_model: bool = True
+    use_clip: bool = False
+    freeze_rep: bool = False
 
 
 class Trainer:
@@ -43,7 +45,10 @@ class Trainer:
 
     def _init_models(self):
         self.affordance_model = AffordanceModel(
-            src_in_features=self.cfg.hidden_dim, freeze_rep=True, device=self.device
+            src_in_features=self.cfg.hidden_dim,
+            use_clip=self.cfg.use_clip,
+            freeze_rep=self.cfg.freeze_rep,
+            device=self.device,
         ).to(self.device)
         self.grasp_transformer = GraspTransformer(text_dim=512, image_dim=512).to(
             self.device
@@ -82,10 +87,15 @@ class Trainer:
             img_feat, text_feat = self.affordance_model.get_clip_features(
                 img, task_description
             )
-            mu, cvar = self.affordance_model.get_mu_cvar(img_feat)
+            if self.cfg.use_clip:
+                mu, cvar = self.affordance_model.get_mu_cvar(img_feat=img_feat)
+            else:
+                # print(f"img: {img.shape}")
+                img_feat = self.affordance_model.get_resnet_features(img)
+                # print(f"img: {img}")
+                mu, cvar = self.affordance_model.get_mu_cvar(img=img)
+
             grasp_rotation, grasp_pose = self.grasp_transformer(text_feat, img_feat)
-            # print(f"img feat: {img_feat.shape}, text feat: {text_feat.shape}")
-            # print(f"b grasp: {gt_grasp_pose.shape}, grasp: {grasp_pose.shape}")
 
             contact_loss = nn.functional.mse_loss(mu, gt_mu)
             grasp_rotation_loss = nn.functional.mse_loss(
@@ -213,6 +223,6 @@ class Trainer:
 
 
 if __name__ == "__main__":
-    cfg = TrainingConfig(device=2, log=True, save_model=True)
+    cfg = TrainingConfig(device=1, log=True, save_model=True)
     trainer = Trainer(cfg)
     trainer.train()

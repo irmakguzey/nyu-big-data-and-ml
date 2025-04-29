@@ -132,6 +132,11 @@ class GraspDataset(Dataset):
 
         org_image = data["img"]
         bbox = data["contact_object_det"]["bbox"]
+        # print(data["contact_object_det"].keys())
+        if "label" in data["contact_object_det"]:
+            object_label = data["contact_object_det"]["label"]
+        else:
+            object_label = data["contact_object_det"]["class"]
         cropped_image = self._crop_image(org_image, bbox)
 
         # Get contact points
@@ -160,7 +165,7 @@ class GraspDataset(Dataset):
             contact_points,
             hand_pose[:3],
             hand_pose[3:],
-            task_description,
+            object_label,
         )
 
     def __getitem__(self, idx):
