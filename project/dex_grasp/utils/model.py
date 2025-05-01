@@ -3,9 +3,9 @@ from dex_grasp.models.affordance_model import AffordanceModel
 from dex_grasp.models.grasp_transformer import GraspTransformer
 
 
-def load_model(device, checkpoint_path):
+def load_model(device, checkpoint_path, use_clip=True, freeze_rep=True):
     affordance_model = AffordanceModel(
-        src_in_features=512, freeze_rep=True, device=device
+        src_in_features=512, freeze_rep=freeze_rep, device=device, use_clip=use_clip
     )
     grasp_transformer = GraspTransformer(text_dim=512, image_dim=512)
 

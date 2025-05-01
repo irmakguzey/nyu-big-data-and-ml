@@ -7,19 +7,21 @@ from dex_grasp.dataset.get_dataloaders import get_dataloaders
 from dex_grasp.models.affordance_model import AffordanceModel
 from dex_grasp.models.grasp_transformer import GraspTransformer
 from dex_grasp.utils.logger import Logger
+from dex_grasp.utils.vector_ops import rotvec_to_quaternion
+from scipy.spatial.transform import Rotation
 from torch import nn
 from tqdm import tqdm
 
 
 @dataclass
 class TrainingConfig:
-    num_epochs: int = 1000
+    num_epochs: int = 600
     batch_size: int = 128
     num_workers: int = 32
     train_dset_split: float = 0.8
     lambda_m: float = 5e-4
     lambda_g: float = 15
-    lambda_r: float = 2
+    lambda_r: float = 5
     hidden_dim: int = 512
     crop_image: bool = False
     test_every_n_epochs: int = 50
@@ -28,6 +30,14 @@ class TrainingConfig:
     save_model: bool = True
     use_clip: bool = False
     freeze_rep: bool = False
+
+    def save_config(self, save_dir: str):
+        """Save config to a file"""
+        os.makedirs(save_dir, exist_ok=True)
+        config_path = os.path.join(save_dir, "config.txt")
+        with open(config_path, "w") as f:
+            for key, value in self.__dict__.items():
+                f.write(f"{key}: {value}\n")
 
 
 class Trainer:
@@ -41,7 +51,10 @@ class Trainer:
         string_local = time.strftime("%m-%d_%H:%M:%S", time_local)
         self.wandb_exp_name = f"grasp_dex_{string_local}"
         if self.cfg.log:
-            self.logger = Logger(self.wandb_exp_name, out_dir=".")
+            self.logger = Logger(self.wandb_exp_name, out_dir=".", config=self.cfg)
+            # self.logger.log_config(self.cfg)
+
+        # self.cfg.save_config(f"checkpoints/{self.wandb_exp_name}")
 
     def _init_models(self):
         self.affordance_model = AffordanceModel(
@@ -90,15 +103,13 @@ class Trainer:
             if self.cfg.use_clip:
                 mu, cvar = self.affordance_model.get_mu_cvar(img_feat=img_feat)
             else:
-                # print(f"img: {img.shape}")
                 img_feat = self.affordance_model.get_resnet_features(img)
-                # print(f"img: {img}")
                 mu, cvar = self.affordance_model.get_mu_cvar(img=img)
 
             grasp_rotation, grasp_pose = self.grasp_transformer(text_feat, img_feat)
 
             contact_loss = nn.functional.mse_loss(mu, gt_mu)
-            grasp_rotation_loss = nn.functional.mse_loss(
+            grasp_rotation_loss = self.get_rotation_loss(
                 grasp_rotation, gt_grasp_rotation
             )
             grasp_pose_loss = nn.functional.mse_loss(grasp_pose, gt_grasp_pose)
@@ -155,6 +166,25 @@ class Trainer:
                     self.save_model(f"checkpoints/{self.wandb_exp_name}", "best")
                 self.save_model(f"checkpoints/{self.wandb_exp_name}", epoch)
 
+            if self.cfg.log:
+                self.logger.log({"epoch": epoch})
+
+    def get_rotation_loss(self, pred_rotation, gt_rotation):
+        pred_quat = rotvec_to_quaternion(pred_rotation)
+        gt_quat = rotvec_to_quaternion(gt_rotation)
+
+        # Normalize quaternions
+        pred_quat = nn.functional.normalize(pred_quat, p=2, dim=-1)
+        gt_quat = nn.functional.normalize(gt_quat, p=2, dim=-1)
+
+        # Compute absolute dot product between unit quaternions
+        dot_product = torch.abs(torch.sum(pred_quat * gt_quat, dim=-1))
+
+        # Loss: 1 - |dot|
+        loss = 1.0 - dot_product
+
+        return loss.mean()
+
     def test_one_epoch(self, epoch):
         self.affordance_model.eval()
         self.grasp_transformer.eval()
@@ -172,11 +202,15 @@ class Trainer:
                 img_feat, text_feat = self.affordance_model.get_clip_features(
                     img, task_description
                 )
-                mu, cvar = self.affordance_model.get_mu_cvar(img_feat)
+                if self.cfg.use_clip:
+                    mu, cvar = self.affordance_model.get_mu_cvar(img_feat=img_feat)
+                else:
+                    img_feat = self.affordance_model.get_resnet_features(img)
+                    mu, cvar = self.affordance_model.get_mu_cvar(img=img)
                 grasp_rotation, grasp_pose = self.grasp_transformer(text_feat, img_feat)
 
             contact_loss = nn.functional.mse_loss(mu, gt_mu)
-            grasp_rotation_loss = nn.functional.mse_loss(
+            grasp_rotation_loss = self.get_rotation_loss(
                 grasp_rotation, gt_grasp_rotation
             )
             grasp_pose_loss = nn.functional.mse_loss(grasp_pose, gt_grasp_pose)
@@ -223,6 +257,8 @@ class Trainer:
 
 
 if __name__ == "__main__":
-    cfg = TrainingConfig(device=1, log=True, save_model=True)
+    cfg = TrainingConfig(
+        device=2, log=True, save_model=True, use_clip=False, freeze_rep=False
+    )
     trainer = Trainer(cfg)
     trainer.train()

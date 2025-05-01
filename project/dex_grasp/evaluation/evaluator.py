@@ -11,9 +11,10 @@ from manotorch.manolayer import ManoLayer, MANOOutput
 
 
 class Evaluator:
-    def __init__(self, dump_dir, device):
+    def __init__(self, dump_dir, device, use_clip=True):
         self.device = device
         self.dump_dir = dump_dir
+        self.use_clip = use_clip
 
         _, self.test_loader = get_dataloaders(
             batch_size=32, num_workers=32, train_dset_split=0.8, crop_image=False
@@ -27,7 +28,9 @@ class Evaluator:
     def _load_model(self):
         self.affordance_model, self.grasp_transformer = load_model(
             device=self.device,
-            checkpoint_path="/home/irmak/Workspace/nyu-big-data-and-ml/project/checkpoints/grasp_dex_04-28_23:46:51/model_best.pth",
+            checkpoint_path="/home/irmak/Workspace/nyu-big-data-and-ml/project/checkpoints/grasp_dex_04-29_20:37:00/model_best.pth",
+            use_clip=self.use_clip,
+            freeze_rep=True,
         )
         self.affordance_model.to(self.device)
         self.grasp_transformer.to(self.device)
@@ -44,7 +47,11 @@ class Evaluator:
             img_feat, text_feat = self.affordance_model.get_clip_features(
                 img, task_description
             )
-            mu, cvar = self.affordance_model.get_mu_cvar(img_feat)
+            if self.use_clip:
+                mu, cvar = self.affordance_model.get_mu_cvar(img_feat=img_feat)
+            else:
+                img_feat = self.affordance_model.get_resnet_features(img)
+                mu, cvar = self.affordance_model.get_mu_cvar(img=img)
             grasp_rotation, grasp_pose = self.grasp_transformer(text_feat, img_feat)
 
         return mu.cpu(), cvar, grasp_rotation, grasp_pose
@@ -174,5 +181,14 @@ class Evaluator:
 
 
 if __name__ == "__main__":
-    evaluator = Evaluator(dump_dir="eval_results", device="cuda")
+    import time
+
+    timestamp = time.time()
+    time_local = time.localtime(timestamp)
+    string_local = time.strftime("%m-%d", time_local)
+    evaluator = Evaluator(
+        dump_dir=f"eval_results/dataset_evals/{string_local}",
+        device="cuda",
+        use_clip=False,
+    )
     evaluator.evaluate()

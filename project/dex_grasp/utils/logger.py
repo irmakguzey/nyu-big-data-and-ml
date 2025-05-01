@@ -1,18 +1,19 @@
 import os
+from dataclasses import asdict, is_dataclass
 
 import wandb
-from omegaconf import DictConfig, OmegaConf
 
 
 # Class for the wandb logger
 class Logger:
-    def __init__(self, exp_name: str, out_dir: str) -> None:
+    def __init__(self, exp_name: str, out_dir: str, config) -> None:
         # Initialize the wandb experiment
         self.wandb_logger = wandb.init(
             project="dex_grasp",
             name=exp_name,
             dir=".",
             settings=wandb.Settings(start_method="thread"),
+            config=config,
         )
 
         self.logger_file = os.path.join(out_dir, "train.log")
