@@ -20,3 +20,13 @@ assignment-2/wandb/*
 
 project/wandb/*
 project/checkpoints/*
+project/*.log
+*.pkl
+*.pth
+*.pt
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.log

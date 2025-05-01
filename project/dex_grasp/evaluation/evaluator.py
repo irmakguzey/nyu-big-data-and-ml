@@ -16,14 +16,16 @@ class Evaluator:
         self.dump_dir = dump_dir
         self.use_clip = use_clip
 
-        _, self.test_loader = get_dataloaders(
-            batch_size=32, num_workers=32, train_dset_split=0.8, crop_image=False
-        )
-
         if not os.path.exists(self.dump_dir):
             os.makedirs(self.dump_dir)
 
+        self._load_data()
         self._load_model()
+
+    def _load_data(self):
+        _, self.test_loader = get_dataloaders(
+            batch_size=32, num_workers=32, train_dset_split=0.8, crop_image=False
+        )
 
     def _load_model(self):
         self.affordance_model, self.grasp_transformer = load_model(

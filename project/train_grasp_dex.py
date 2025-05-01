@@ -1,43 +1,16 @@
 import os
 import time
-from dataclasses import dataclass
 
 import torch
 from dex_grasp.dataset.get_dataloaders import get_dataloaders
 from dex_grasp.models.affordance_model import AffordanceModel
 from dex_grasp.models.grasp_transformer import GraspTransformer
+from dex_grasp.utils.config import TrainingConfig
 from dex_grasp.utils.logger import Logger
 from dex_grasp.utils.vector_ops import rotvec_to_quaternion
 from scipy.spatial.transform import Rotation
 from torch import nn
 from tqdm import tqdm
-
-
-@dataclass
-class TrainingConfig:
-    num_epochs: int = 600
-    batch_size: int = 128
-    num_workers: int = 32
-    train_dset_split: float = 0.8
-    lambda_m: float = 5e-4
-    lambda_g: float = 15
-    lambda_r: float = 5
-    hidden_dim: int = 512
-    crop_image: bool = False
-    test_every_n_epochs: int = 50
-    device: int = 1
-    log: bool = True
-    save_model: bool = True
-    use_clip: bool = False
-    freeze_rep: bool = False
-
-    def save_config(self, save_dir: str):
-        """Save config to a file"""
-        os.makedirs(save_dir, exist_ok=True)
-        config_path = os.path.join(save_dir, "config.txt")
-        with open(config_path, "w") as f:
-            for key, value in self.__dict__.items():
-                f.write(f"{key}: {value}\n")
 
 
 class Trainer:
@@ -170,20 +143,24 @@ class Trainer:
                 self.logger.log({"epoch": epoch})
 
     def get_rotation_loss(self, pred_rotation, gt_rotation):
-        pred_quat = rotvec_to_quaternion(pred_rotation)
-        gt_quat = rotvec_to_quaternion(gt_rotation)
+        if self.cfg.use_quat_loss:
+            pred_quat = rotvec_to_quaternion(pred_rotation)
+            gt_quat = rotvec_to_quaternion(gt_rotation)
 
-        # Normalize quaternions
-        pred_quat = nn.functional.normalize(pred_quat, p=2, dim=-1)
-        gt_quat = nn.functional.normalize(gt_quat, p=2, dim=-1)
+            # Normalize quaternions
+            pred_quat = nn.functional.normalize(pred_quat, p=2, dim=-1)
+            gt_quat = nn.functional.normalize(gt_quat, p=2, dim=-1)
 
-        # Compute absolute dot product between unit quaternions
-        dot_product = torch.abs(torch.sum(pred_quat * gt_quat, dim=-1))
+            # Compute absolute dot product between unit quaternions
+            dot_product = torch.abs(torch.sum(pred_quat * gt_quat, dim=-1))
 
-        # Loss: 1 - |dot|
-        loss = 1.0 - dot_product
+            # Loss: 1 - |dot|
+            loss = 1.0 - dot_product
 
-        return loss.mean()
+            return loss.mean()
+
+        else:
+            return nn.functional.mse_loss(pred_rotation, gt_rotation)
 
     def test_one_epoch(self, epoch):
         self.affordance_model.eval()
@@ -258,7 +235,12 @@ class Trainer:
 
 if __name__ == "__main__":
     cfg = TrainingConfig(
-        device=2, log=True, save_model=True, use_clip=False, freeze_rep=False
+        device=3,
+        log=True,
+        save_model=True,
+        use_clip=True,
+        freeze_rep=True,
+        use_quat_loss=True,
     )
     trainer = Trainer(cfg)
     trainer.train()

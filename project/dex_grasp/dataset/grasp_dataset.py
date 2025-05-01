@@ -177,6 +177,43 @@ class GraspDataset(Dataset):
         return len(self.pkl_files)
 
 
+class DexGraspEvalDataset(Dataset):
+    def __init__(self, pkl_dir):
+        self.pkl_files = glob.glob(os.path.join(pkl_dir, "*.pkl"))
+        self.transform = (
+            transforms.Compose(  # NOTE: This is basically used for debugging!
+                [
+                    transforms.ToTensor(),
+                    transforms.Lambda(center_crop_square),
+                    transforms.Resize((224, 224)),
+                ]
+            )
+        )
+
+    def __len__(self):
+        return len(self.pkl_files)
+
+    def load_pkl(self, pkl_file_path):
+        with open(pkl_file_path, "rb") as f:
+            data = pickle.load(f)
+
+        # NOTE: Not sure if i want to return the original image as well
+        image = self.transform(data["img"]).clamp(
+            0, 1
+        )  # Should clamp it to input to clip preprocessor
+        text_prompt = data["text"]
+
+        return (
+            image,
+            text_prompt,
+        )
+
+    def __getitem__(self, idx):
+        pkl_path = self.pkl_files[idx]
+        pkl_data = self.load_pkl(pkl_path)
+        return pkl_data
+
+
 if __name__ == "__main__":
     dataset = GraspDataset(
         pkl_dir="/data_ssd/irmak/deft-data-all/ego4d-r3m/labels_obj_bbox",

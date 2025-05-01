@@ -1,5 +1,5 @@
 import torch
-from dex_grasp.dataset.grasp_dataset import GraspDataset
+from dex_grasp.dataset.grasp_dataset import DexGraspEvalDataset, GraspDataset
 from torch.utils.data import ConcatDataset, DataLoader, random_split
 
 
@@ -45,7 +45,27 @@ def get_dataloaders(
     return train_dataloader, test_dataloader
 
 
+def get_eval_dataloader(batch_size=32, num_workers=32):
+    pkl_dirs = [
+        "/home/irmak/Workspace/nyu-big-data-and-ml/project/dex_grasp_eval_dataset"
+    ]
+
+    dsets = []
+    for pkl_dir in pkl_dirs:
+        dsets.append(
+            DexGraspEvalDataset(
+                pkl_dir=pkl_dir,
+            )
+        )
+
+    dataset = ConcatDataset(dsets)
+    dataloader = DataLoader(
+        dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers
+    )
+    return dataloader
+
+
 if __name__ == "__main__":
-    dataloader = get_dataloaders()
+    dataloader = get_eval_dataloader()
     for batch in dataloader:
         print(batch)
