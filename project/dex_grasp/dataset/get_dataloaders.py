@@ -66,6 +66,28 @@ def get_eval_dataloader(batch_size=32, num_workers=32):
 
 
 if __name__ == "__main__":
-    dataloader = get_eval_dataloader()
-    for batch in dataloader:
-        print(batch)
+    import cv2
+    from dex_grasp.utils.visualization import plot_bbox, plot_contact
+
+    _, test_loader = get_dataloaders(
+        batch_size=32, num_workers=32, train_dset_split=0.8, crop_image=True
+    )
+
+    for batch in test_loader:
+        for i in range(len(batch[0])):
+            img = batch[0][i]
+            contact_points = batch[1][i]
+            object_label = batch[4][i]
+            bbox = batch[5][i]
+
+            # print(img.shape, contact_points.shape, bbox.shape, object_label)
+
+            img = plot_contact(
+                img=img, gt_contact=contact_points, task_description=object_label
+            )
+            img = plot_bbox(img=img, bbox=bbox)
+
+            cv2.imwrite(f"debug_image_{i}_crop_True.png", img)
+            i += 1
+
+        break

@@ -11,6 +11,7 @@ import cv2
 def generate_single_pkl(img_path, save_dir):
     # Load the image
     img = cv2.imread(img_path)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
     # Get the text prompt from the path
     img_name = img_path.split("/")[-1]
@@ -51,6 +52,6 @@ def generate_dataset(img_dir, save_dir):
 
 if __name__ == "__main__":
     generate_dataset(
-        "/home/irmak/Workspace/nyu-big-data-and-ml/project/resized_dex_grasp_pics",
-        "dex_grasp_eval_dataset",
+        "/home/irmak/Workspace/nyu-big-data-and-ml/project/dex-grasp-ood-dataset-2",
+        "/home/irmak/Workspace/nyu-big-data-and-ml/project/dex_grasp_eval_dataset_2",
     )

@@ -27,7 +27,7 @@ class Trainer:
             self.logger = Logger(self.wandb_exp_name, out_dir=".", config=self.cfg)
             # self.logger.log_config(self.cfg)
 
-        # self.cfg.save_config(f"checkpoints/{self.wandb_exp_name}")
+        self.cfg.save_config(f"checkpoints/{self.wandb_exp_name}")
 
     def _init_models(self):
         self.affordance_model = AffordanceModel(

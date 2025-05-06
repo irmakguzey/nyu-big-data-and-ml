@@ -34,23 +34,33 @@ class GraspDataset(Dataset):
         # Initialize the processor with a specific model
         # NOTE: We will be using Dinov2-base as our image processor / and encoder
         # self.processor = AutoImageProcessor.from_pretrained("facebook/dinov2-base")
-        self.transform = (
-            transforms.Compose(  # NOTE: This is basically used for debugging!
-                [
-                    transforms.ToTensor(),
-                    transforms.Lambda(center_crop_square),
-                    transforms.Resize((224, 224)),
-                ]
+        if return_cropped_image:
+            self.transform = (
+                transforms.Compose(  # NOTE: This is basically used for debugging!
+                    [transforms.ToTensor(), transforms.Resize((224, 224))]
+                )
             )
-        )
+        else:
+            self.transform = (
+                transforms.Compose(  # NOTE: This is basically used for debugging!
+                    [
+                        transforms.ToTensor(),
+                        transforms.Lambda(center_crop_square),
+                        transforms.Resize((224, 224)),
+                    ]
+                )
+            )
 
-    def _transform_contact_point(self, contact_point, img):
-        if isinstance(img, torch.Tensor):
-            _, h, w = img.shape  # (C, H, W)
-        elif isinstance(img, np.ndarray):
-            h, w = img.shape[:2]
+    def _transform_contact_point(self, contact_point, org_img, bbox):
+        if isinstance(org_img, torch.Tensor):
+            _, h, w = org_img.shape  # (C, H, W)
+        elif isinstance(org_img, np.ndarray):
+            h, w = org_img.shape[:2]
 
-        crop_size = min(h, w)
+        if not self.return_cropped_image:
+            crop_h, crop_w = min(h, w), min(h, w)
+        else:  # NOTE: if the image is cropped then we should not really thinking of cropped the image from the middle!
+            crop_h, crop_w = bbox[3] - bbox[1], bbox[2] - bbox[0]
         resize_size = (224, 224)
 
         """
@@ -58,11 +68,14 @@ class GraspDataset(Dataset):
         Returns transformed points: (batch_size, 2) torch tensor
         """
         orig_h, orig_w = h, w
-        crop_h, crop_w = crop_size, crop_size
         resize_h, resize_w = resize_size
 
-        crop_x_start = (orig_w - crop_w) / 2
-        crop_y_start = (orig_h - crop_h) / 2
+        if not self.return_cropped_image:
+            crop_x_start = (orig_w - crop_w) / 2
+            crop_y_start = (orig_h - crop_h) / 2
+        else:
+            crop_x_start = bbox[0]
+            crop_y_start = bbox[1]
 
         scale_x = resize_w / crop_w
         scale_y = resize_h / crop_h
@@ -73,49 +86,44 @@ class GraspDataset(Dataset):
         x_cropped = x - crop_x_start
         y_cropped = y - crop_y_start
 
+        print(f"x_cropped: {x_cropped}, y_cropped: {y_cropped}")
+
         x_resized = x_cropped * scale_x
         y_resized = y_cropped * scale_y
 
         transformed_points = torch.stack([x_resized, y_resized], dim=-1)
+
+        # print(f"cropped_img.shape: {cropped_img.shape}, org_img.shape: {org_img.shape}")
+        # print(
+        #     f"transformed_points: {transformed_points}, org_contact_point: {contact_point}"
+        # )
 
         return transformed_points
 
     def _crop_image(self, org_image, bbox):
         if self.return_cropped_image:
             y1, x1, y2, x2 = [int(x) for x in bbox]
-            bbox_offset = 20
-            y1, x1, y2, x2 = (
-                int(y1) - bbox_offset,
-                int(x1) - bbox_offset,
-                int(y2) + bbox_offset,
-                int(x2) + bbox_offset,
-            )
+            # bbox_offset = 20
+            # y1, x1, y2, x2 = (
+            #     int(y1) - bbox_offset,
+            #     int(x1) - bbox_offset,
+            #     int(y2) + bbox_offset,
+            #     int(x2) + bbox_offset,
+            # )
             if y1 < 0:
                 y1 = 0
             if x1 < 0:
                 x1 = 0
-            if y2 > org_image.shape[0]:
-                y2 = org_image.shape[0]
-            if x2 > org_image.shape[1]:
-                x2 = org_image.shape[1]
-
-            width = y2 - y1
-            height = x2 - x1
-
-            diff = width - height
-            if width > height:
-                y1 += int(diff / np.random.uniform(1.5, 2.5))
-                y2 -= int((diff / (np.random.uniform(1.5, 2.5) + diff % 2)))
-            else:
-                diff = height - width
-                x1 += int(diff / np.random.uniform(1.5, 2.5))
-                x2 -= int((diff / (np.random.uniform(1.5, 2.5) + diff % 2)))
+            if x2 > org_image.shape[0]:
+                x2 = org_image.shape[0]
+            if y2 > org_image.shape[1]:
+                y2 = org_image.shape[1]
 
             # Crop the image using the bounding box coordinates
             cropped_image = org_image[x1:x2, y1:y2]
-            return cropped_image
+            return cropped_image, torch.Tensor([y1, x1, y2, x2])
         else:
-            return org_image
+            return org_image, bbox
 
     def load_pkl(self, pkl_file_path):
         with open(pkl_file_path, "rb") as f:
@@ -131,13 +139,14 @@ class GraspDataset(Dataset):
             hand_pose = np.expand_dims(hand_pose, axis=0)
 
         org_image = data["img"]
-        bbox = data["contact_object_det"]["bbox"]
-        # print(data["contact_object_det"].keys())
+        bbox = torch.FloatTensor(data["contact_object_det"]["bbox"])
+
+        # print(data["contact_object_det"].keys(), bbox.shape)
         if "label" in data["contact_object_det"]:
             object_label = data["contact_object_det"]["label"]
         else:
             object_label = data["contact_object_det"]["class"]
-        cropped_image = self._crop_image(org_image, bbox)
+        cropped_image, cropped_bbox = self._crop_image(org_image, bbox)
 
         # Get contact points
         contact_points = torch.FloatTensor(data["contact"])[:5]
@@ -147,17 +156,28 @@ class GraspDataset(Dataset):
             while len(contact_points) < 5:
                 contact_points = torch.cat([contact_points, last_point], dim=0)
 
+        print(f"pre transform contact_points: {contact_points}, bbox: {bbox}")
         if self.transform_contact:
+            # try:
             contact_points = self._transform_contact_point(
-                contact_points, cropped_image
+                contact_points, org_img=org_image, bbox=bbox
             )
+            bbox[:2] = self._transform_contact_point(
+                cropped_bbox[:2].unsqueeze(0), org_img=org_image, bbox=cropped_bbox
+            )[0]
+            bbox[2:] = self._transform_contact_point(
+                cropped_bbox[2:].unsqueeze(0), org_img=org_image, bbox=cropped_bbox
+            )[0]
+            # except Exception as e:
+            #     print(e)
+            #     print(bbox, org_image.shape, cropped_image.shape)
 
+        print(f"post transform contact_points: {contact_points}, bbox: {bbox}")
         # NOTE: Not sure if i want to return the original image as well
         image = self.transform(cropped_image).clamp(
             0, 1
         )  # Should clamp it to input to clip preprocessor
-        grasp_rotation = torch.FloatTensor(R.from_matrix(data["H"]).as_rotvec())
-        task_description = data["narration"]
+
         hand_pose = torch.FloatTensor(hand_pose)[0]
 
         return (
@@ -166,6 +186,7 @@ class GraspDataset(Dataset):
             hand_pose[:3],
             hand_pose[3:],
             object_label,
+            bbox,
         )
 
     def __getitem__(self, idx):
@@ -224,23 +245,25 @@ if __name__ == "__main__":
     batch = next(iter(dataloader))
 
     # Visualize the image
-    # image = batch[0][0, :, :]
-    # task_description = batch[5][0]
-    # obj_description = batch[6][0]
-    # print(image.shape)
-    # # Convert to numpy and ensure correct shape
-    # image_np = image.numpy()
-    # # If image is in range [0,1], scale to [0,255]
-    # if image_np.max() <= 1.0:
-    #     image_np = (image_np * 255).astype(np.uint8)
-    # else:
-    #     image_np = image_np.astype(np.uint8)
-    # # Ensure correct shape for PIL
-    # if len(image_np.shape) == 3 and image_np.shape[0] == 3:  # CHW format
-    #     image_np = np.transpose(image_np, (1, 2, 0))  # Convert to HWC
-    # image_pil = Image.fromarray(image_np)
-    # image_pil.save(f"debug_image_{task_description}_{obj_description}.png")
-    # print(task_description)
+    img = batch[0]
+    task_description = batch[4]
+    gt_mu = batch[1][:, :, :2]
+    gt_grasp_rotation = batch[2]
+    gt_grasp_pose = batch[3]
+    print(img.shape)
+    # Convert to numpy and ensure correct shape
+    image_np = img.numpy()
+    # If image is in range [0,1], scale to [0,255]
+    if image_np.max() <= 1.0:
+        image_np = (image_np * 255).astype(np.uint8)
+    else:
+        image_np = image_np.astype(np.uint8)
+    # Ensure correct shape for PIL
+    if len(image_np.shape) == 3 and image_np.shape[0] == 3:  # CHW format
+        image_np = np.transpose(image_np, (1, 2, 0))  # Convert to HWC
+    image_pil = Image.fromarray(image_np)
+    image_pil.save(f"debug_image_{task_description}.png")
+    print(task_description)
     # import pdb
 
     # pdb.set_trace()

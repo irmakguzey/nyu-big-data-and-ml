@@ -1,6 +1,9 @@
+from io import BytesIO
+
 import cv2
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from scipy.spatial.transform import Rotation as R
 
 
@@ -19,7 +22,8 @@ def plot_hand_pose_3d(hand_pose, linestyle="-", fig=None, ax=None):
         hand_pose[0, 1],
         hand_pose[0, 2],
         color="r",
-        label="Wrist",
+        linewidth=3,
+        # label="Wrist",
     )
     for i in range(5):
         start_idx = i * 4 + 1
@@ -30,7 +34,8 @@ def plot_hand_pose_3d(hand_pose, linestyle="-", fig=None, ax=None):
             hand_pose[start_idx:end_idx, 2],
             color=finger_colors[i],
             linestyle=linestyle,
-            label=f"Finger {i+1}",
+            linewidth=3,
+            # label=f"Finger {i+1}",
         )
         ax.plot(
             [hand_pose[0, 0], hand_pose[start_idx, 0]],
@@ -38,6 +43,7 @@ def plot_hand_pose_3d(hand_pose, linestyle="-", fig=None, ax=None):
             [hand_pose[0, 2], hand_pose[start_idx, 2]],
             color=finger_colors[i],
             linestyle=linestyle,
+            linewidth=3,
         )
 
     # Set labels and title
@@ -70,15 +76,15 @@ def plot_rotation(fig=None, ax=None, rotation=None, origin=np.zeros(3), linestyl
     z_rot = (rot_mat @ z_axis) * axis_scale
 
     # Plot rotated coordinate axes
-    ax.quiver(*origin, *x_rot, color="r", linestyle=linestyle, label="x'")
-    ax.quiver(*origin, *y_rot, color="g", linestyle=linestyle, label="y'")
-    ax.quiver(*origin, *z_rot, color="b", linestyle=linestyle, label="z'")
+    ax.quiver(*origin, *x_rot, color="r", linestyle=linestyle, linewidth=3)
+    ax.quiver(*origin, *y_rot, color="g", linestyle=linestyle, linewidth=3)
+    ax.quiver(*origin, *z_rot, color="b", linestyle=linestyle, linewidth=3)
 
     # Set limits and labels
     ax.set_xlim(-0.05, 0.15)
     ax.set_ylim(-0.10, 0.15)
     ax.set_zlim(-0.10, 0.05)
-    ax.legend()
+    # ax.legend()
     return fig, ax
 
 
@@ -174,3 +180,70 @@ def draw_text(image, text, position=None, pose=None, intrinsics=None):
     image = cv2.putText(image, text, position, font, font_scale, text_color, thickness)
 
     return image
+
+
+def fig_to_img(fig):
+    """Convert a Matplotlib figure to a BGR image (as a NumPy array)."""
+    # canvas = FigureCanvas(fig)
+    # canvas.draw()
+    # width, height = fig.get_size_inches() * fig.get_dpi()
+    # img = np.frombuffer(canvas.tostring_rgb(), dtype="uint8").reshape(
+    #     int(height), int(width), 3
+    # )
+    # return cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+    buf = BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight", dpi=fig.dpi)
+    buf.seek(0)
+    img_array = np.frombuffer(buf.getvalue(), dtype=np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    buf.close()
+    return img
+
+
+def plot_contact(img, pred_contact=None, gt_contact=None, task_description=None):
+    # Convert image to numpy array if it's a tensor
+    if isinstance(img, torch.Tensor):
+        img = img.cpu().numpy().transpose(1, 2, 0)
+        img = (img * 255).astype(np.uint8)
+
+    # Create a copy of the image to draw on
+    img_with_points = img.copy()
+
+    # Plot ground truth contact points
+    if gt_contact is not None:
+        gt_contact = gt_contact.cpu().numpy()
+        for point in gt_contact:
+            x, y = int(point[0]), int(point[1])
+            cv2.circle(
+                img_with_points, (x, y), radius=5, color=(0, 255, 0), thickness=-1
+            )  # Green circles for GT
+
+    # Plot predicted contact points
+    if pred_contact is not None:
+        pred_contact = pred_contact.cpu().numpy()
+        for point in pred_contact:
+            x, y = int(point[0]), int(point[1])
+            cv2.circle(
+                img_with_points, (x, y), radius=5, color=(255, 0, 0), thickness=-1
+            )  # Red circles for predictions
+
+    # Save the image with contact points
+    if task_description is not None:
+        img_with_points = draw_text(
+            img_with_points, task_description, position=(10, 30)
+        )
+
+    img_with_points = cv2.cvtColor(img_with_points, cv2.COLOR_RGB2BGR)
+    # cv2.imwrite(
+    #     f"{self.dump_dir}/contact_points_{'_'.join(task_description.split(' '))}.png",
+    #     img_with_points,
+    # )
+
+    return img_with_points
+
+
+def plot_bbox(img, bbox):
+    img_with_points = img.copy()
+    x1, y1, x2, y2 = [int(x) for x in bbox]
+    cv2.rectangle(img_with_points, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
+    return img_with_points

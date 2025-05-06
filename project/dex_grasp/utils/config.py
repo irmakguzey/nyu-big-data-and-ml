@@ -36,3 +36,18 @@ class TrainingConfig:
             for line in f:
                 key, value = line.split(": ")
                 setattr(self, key, value)
+
+
+def generate_fake_config(save_dir):
+    config = TrainingConfig(
+        use_clip=True,
+        freeze_rep=True,
+        use_quat_loss=True,
+    )
+    config.save_config(save_dir)
+
+
+if __name__ == "__main__":
+    generate_fake_config(
+        "/home/irmak/Workspace/nyu-big-data-and-ml/project/checkpoints/grasp_dex_05-01_18:02:04"
+    )
