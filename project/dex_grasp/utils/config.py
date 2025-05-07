@@ -13,13 +13,20 @@ class TrainingConfig:
     lambda_r: float = 5
     hidden_dim: int = 512
     crop_image: bool = False
-    test_every_n_epochs: int = 50
+    test_every_n_epochs: int = 10
     device: int = 1
     log: bool = True
     save_model: bool = True
     use_clip: bool = False
     freeze_rep: bool = False
     use_quat_loss: bool = True
+
+    def from_file(self, file_path: str):
+        """Load config from a file"""
+        with open(file_path, "r") as f:
+            for line in f:
+                key, value = line.split(": ")
+                setattr(self, key, value)
 
     def save_config(self, save_dir: str):
         """Save config to a file"""

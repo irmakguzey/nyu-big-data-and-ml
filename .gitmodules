@@ -10,3 +10,9 @@
 [submodule "project/submodules/manotorch"]
 	path = project/submodules/manotorch
 	url = https://github.com/lixiny/manotorch.git
+[submodule "project/submodules/GroundingDINO"]
+	path = project/submodules/GroundingDINO
+	url = https://github.com/IDEA-Research/GroundingDINO.git
+[submodule "project/submodules/segment-anything"]
+	path = project/submodules/segment-anything
+	url = https://github.com/irmakguzey/segment-anything.git

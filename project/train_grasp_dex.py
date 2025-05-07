@@ -137,7 +137,7 @@ class Trainer:
                 if test_loss < best_loss:
                     best_loss = test_loss
                     self.save_model(f"checkpoints/{self.wandb_exp_name}", "best")
-                self.save_model(f"checkpoints/{self.wandb_exp_name}", epoch)
+                # self.save_model(f"checkpoints/{self.wandb_exp_name}", epoch)
 
             if self.cfg.log:
                 self.logger.log({"epoch": epoch})
@@ -240,7 +240,8 @@ if __name__ == "__main__":
         save_model=True,
         use_clip=True,
         freeze_rep=True,
-        use_quat_loss=True,
+        use_quat_loss=False,
+        crop_image=True,
     )
     trainer = Trainer(cfg)
     trainer.train()

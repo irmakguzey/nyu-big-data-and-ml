@@ -86,7 +86,7 @@ class GraspDataset(Dataset):
         x_cropped = x - crop_x_start
         y_cropped = y - crop_y_start
 
-        print(f"x_cropped: {x_cropped}, y_cropped: {y_cropped}")
+        # print(f"x_cropped: {x_cropped}, y_cropped: {y_cropped}")
 
         x_resized = x_cropped * scale_x
         y_resized = y_cropped * scale_y
@@ -156,7 +156,7 @@ class GraspDataset(Dataset):
             while len(contact_points) < 5:
                 contact_points = torch.cat([contact_points, last_point], dim=0)
 
-        print(f"pre transform contact_points: {contact_points}, bbox: {bbox}")
+        # print(f"pre transform contact_points: {contact_points}, bbox: {bbox}")
         if self.transform_contact:
             # try:
             contact_points = self._transform_contact_point(
@@ -172,7 +172,7 @@ class GraspDataset(Dataset):
             #     print(e)
             #     print(bbox, org_image.shape, cropped_image.shape)
 
-        print(f"post transform contact_points: {contact_points}, bbox: {bbox}")
+        # print(f"post transform contact_points: {contact_points}, bbox: {bbox}")
         # NOTE: Not sure if i want to return the original image as well
         image = self.transform(cropped_image).clamp(
             0, 1

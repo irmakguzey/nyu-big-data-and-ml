@@ -23,14 +23,16 @@ class Evaluator:
         self.dump_dir = dump_dir
         self.use_clip = use_clip
         self.checkpoint_path = checkpoint_path
-        checkpoint_dir = os.path.dirname(checkpoint_path)
+        self.checkpoint_dir = os.path.dirname(checkpoint_path)
         if not os.path.exists(self.dump_dir):
             os.makedirs(self.dump_dir)
 
-        if os.path.exists(f"{checkpoint_dir}/config.txt"):
+        if os.path.exists(f"{self.checkpoint_dir}/config.txt"):
             # Copy config file to dump directory
-            print(f"Copying config file to {dump_dir}")
-            shutil.copy2(f"{checkpoint_dir}/config.txt", f"{dump_dir}/config.txt")
+            print(f"Copying config file to {self.dump_dir}")
+            shutil.copy2(
+                f"{self.checkpoint_dir}/config.txt", f"{self.dump_dir}/config.txt"
+            )
 
         self._load_data()
         self._load_model()

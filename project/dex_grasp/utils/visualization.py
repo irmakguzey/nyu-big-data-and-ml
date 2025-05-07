@@ -247,3 +247,51 @@ def plot_bbox(img, bbox):
     x1, y1, x2, y2 = [int(x) for x in bbox]
     cv2.rectangle(img_with_points, (x1, y1), (x2, y2), color=(0, 255, 0), thickness=2)
     return img_with_points
+
+
+# Method to add dino boxes to the given image with the given confidense scores
+def vis_dino_boxes(ax, image, boxes, logits):
+    ax.imshow(image)
+    ax.set_title("Image with Bounding Boxes")
+    ax.axis("off")
+
+    for box, logit in zip(boxes, logits):
+        x_min, y_min, x_max, y_max = int(box[0]), int(box[1]), int(box[2]), int(box[3])
+        confidence_score = round(
+            logit.item(), 2
+        )  # Convert logit to a scalar before rounding
+        box_width = x_max - x_min
+        box_height = y_max - y_min
+
+        # Draw bounding box
+        rect = plt.Rectangle(
+            (x_min, y_min),
+            box_width,
+            box_height,
+            fill=False,
+            edgecolor="red",
+            linewidth=2,
+        )
+        ax.add_patch(rect)
+
+        # Add confidence score as text
+        ax.text(
+            x_min,
+            y_min,
+            f"Confidence: {confidence_score}",
+            fontsize=8,
+            color="red",
+            verticalalignment="top",
+        )
+
+    plt.tight_layout()
+    return ax
+
+
+# Method to add mask from the sam to the given axis
+def vis_sam_mask(ax, mask):
+    ax.imshow(mask, cmap="gray")
+    ax.axis("off")
+    plt.tight_layout()
+
+    return ax
